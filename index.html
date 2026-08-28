@@ -4,59 +4,44 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Find Rare Books – Poster Maker</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
             background: #3e2c1b;
             display: flex;
             justify-content: center;
-            padding: 30px 10px;
-            margin: 0;
+            padding: 30px 15px;
         }
-        .app-container {
-            max-width: 950px;
+        .app {
+            max-width: 960px;
             width: 100%;
             background: #f7f0e3;
             padding: 30px 25px;
             border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
             border: 2px solid #a67c52;
         }
         h1 {
             text-align: center;
+            font-family: 'Times New Roman', serif;
             color: #3e2c1b;
             border-bottom: 3px double #a67c52;
             padding-bottom: 10px;
-            margin-top: 0;
-            font-family: 'Times New Roman', serif;
-            letter-spacing: 2px;
         }
-        h1 small {
-            font-size: 14px;
-            display: block;
-            color: #6b4f2e;
-        }
+        h1 small { display: block; font-size: 14px; color: #6b4f2e; }
         .section {
             background: #fffcf5;
             padding: 20px;
             border-radius: 15px;
             margin-bottom: 20px;
             border: 1px solid #d6c4b0;
-            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05);
         }
         .section-title {
             font-weight: bold;
             font-size: 18px;
             color: #4e3823;
             margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .row {
             display: flex;
@@ -64,12 +49,8 @@
             gap: 15px;
             margin-bottom: 12px;
         }
-        .col {
-            flex: 1 1 180px;
-        }
-        .col-full {
-            flex: 1 1 100%;
-        }
+        .col { flex: 1 1 200px; }
+        .col-full { flex: 1 1 100%; }
         label {
             display: block;
             font-weight: 600;
@@ -77,9 +58,7 @@
             color: #5a402a;
             margin-bottom: 4px;
         }
-        input,
-        select,
-        textarea {
+        input, select, textarea {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #cbb6a2;
@@ -88,95 +67,91 @@
             font-size: 14px;
             transition: 0.2s;
         }
-        input:focus,
-        select:focus,
-        textarea:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #8b5e3c;
-            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
+            box-shadow: 0 0 0 3px rgba(139,94,60,0.2);
         }
+        textarea { resize: vertical; min-height: 40px; }
         .btn {
             background: #6b4f2e;
             color: white;
             border: none;
-            padding: 12px 28px;
+            padding: 12px 32px;
             border-radius: 40px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
             transition: 0.2s;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-            margin-top: 8px;
         }
-        .btn:hover {
-            background: #4e3823;
-            transform: scale(0.97);
-        }
-        .btn-secondary {
-            background: #a67c52;
-        }
-        .btn-secondary:hover {
-            background: #8b653f;
-        }
-        #status {
-            background: #e2d5c6;
-            padding: 10px 15px;
-            border-radius: 30px;
-            font-size: 14px;
-            color: #3e2c1b;
-            margin: 10px 0;
-            min-height: 45px;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .poster-preview {
+        .btn:hover { background: #4e3823; transform: scale(0.97); }
+        .btn-secondary { background: #a67c52; }
+        .btn-secondary:hover { background: #8b653f; }
+        .btn-green { background: #3d7a4a; }
+        .btn-green:hover { background: #2e5f39; }
+        .btn-center { text-align: center; margin: 10px 0; }
+        .poster-wrap {
             display: flex;
             justify-content: center;
-            margin: 20px 0;
             background: #d6c4b0;
             padding: 20px;
             border-radius: 20px;
             border: 2px dashed #6b4f2e;
+            margin: 15px 0;
         }
         #posterCanvas {
             max-width: 100%;
             height: auto;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .cover-preview {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            background: #ede4d6;
+            padding: 12px 18px;
+            border-radius: 40px;
+        }
+        .cover-preview img {
+            width: 80px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #6b4f2e;
+            background: #fff;
         }
         .caption-box {
             background: #2c1e12;
             color: #f0e3d5;
-            padding: 20px;
+            padding: 18px;
             border-radius: 15px;
-            margin-top: 15px;
+            margin-top: 12px;
             white-space: pre-wrap;
-            word-break: break-word;
         }
         .caption-box textarea {
             background: #3d2d1d;
             color: #f5ede4;
             border: 1px solid #8b6f52;
-            min-height: 150px;
+            min-height: 140px;
             font-size: 14px;
             line-height: 1.6;
-        }
-        .flex-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin: 15px 0;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
         }
         .serial-group {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-top: 10px;
-            background: #eaddcf;
-            padding: 12px 18px;
-            border-radius: 40px;
+            gap: 14px;
             flex-wrap: wrap;
+            background: #eaddcf;
+            padding: 12px 20px;
+            border-radius: 40px;
+            margin-top: 6px;
         }
         .serial-group label {
             margin: 0;
@@ -185,169 +160,135 @@
         }
         .serial-group input {
             width: 200px;
-            background: white;
             font-family: monospace;
             font-size: 20px;
             text-align: center;
         }
-        .page-selector {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .page-selector input {
-            width: 80px;
-        }
-        .thumb-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
-        }
-        .thumb-container img {
-            width: 70px;
-            border: 2px solid #a67c52;
-            border-radius: 6px;
-            margin: 2px;
-        }
-        .logo-status {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #eaddcf;
-            padding: 8px 18px;
-            border-radius: 40px;
-            margin-top: 8px;
+        #status {
+            background: #e2d5c6;
+            padding: 10px 18px;
+            border-radius: 30px;
             font-size: 14px;
             color: #3e2c1b;
+            min-height: 44px;
+            margin: 10px 0;
+            white-space: pre-wrap;
         }
-        .logo-status .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
+        .parse-area {
+            background: #f1e8db;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 10px;
         }
-        .dot.green {
-            background: #2e7d32;
+        .parse-area textarea {
+            background: #fffdf7;
+            min-height: 120px;
         }
-        .dot.gray {
-            background: #9e9e9e;
+        .parse-area .row {
+            margin-top: 10px;
         }
         @media (max-width: 600px) {
-            .app-container {
-                padding: 15px;
-            }
-            .col {
-                flex: 1 1 100%;
-            }
+            .app { padding: 15px; }
+            .col { flex: 1 1 100%; }
+            .cover-preview { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
+    <div class="app">
         <h1>📖 POSTER MAKER <small>Find Rare Books • UK Vintage</small></h1>
 
-        <!-- SECTION 1: Upload PDF -->
+        <!-- ======== UPLOAD COVER ======== -->
         <div class="section">
-            <div class="section-title">📄 1. Upload PDF</div>
-            <input type="file" id="pdfUpload" accept=".pdf" />
-            <div id="thumbContainer" class="thumb-container"></div>
-
-            <!-- Logo Status (fixed, no upload needed) -->
-            <div class="logo-status">
-                <span class="dot green" id="logoStatusDot"></span>
-                <span id="logoStatusText">✅ Logo loaded from: images/logo.png</span>
+            <div class="section-title">📸 1. Upload Cover Photo</div>
+            <input type="file" id="coverUpload" accept="image/*" />
+            <div class="cover-preview" id="coverPreviewArea" style="display:none;">
+                <span>📷 Cover:</span>
+                <img id="coverPreviewImg" alt="preview" />
+                <span id="coverFileName" style="color:#5a402a;"></span>
             </div>
-
-            <div class="row page-selector">
-                <div class="col">
-                    <label>📸 Cover Page No.</label>
-                    <input type="number" id="coverPage" value="1" min="1" />
-                </div>
-                <div class="col">
-                    <label>🔍 Info Page (OCR) No.</label>
-                    <input type="number" id="infoPage" value="2" min="1" />
-                </div>
-                <div class="col" style="flex:0 0 auto;">
-                    <button class="btn btn-secondary" id="scanBtn">🔎 Scan OCR</button>
-                </div>
-            </div>
-            <div id="status">⏳ Status: Upload a PDF and click 'Scan OCR'.</div>
         </div>
 
-        <!-- SECTION 2: Repair Fields -->
+        <!-- ======== PASTE & PARSE ======== -->
         <div class="section">
-            <div class="section-title">✏️ 2. Check & Repair Information</div>
-            <div class="row">
-                <div class="col">
-                    <label>📘 Book Name</label>
-                    <input id="bookName" placeholder="e.g. Wuthering Heights" />
+            <div class="section-title">📝 2. Paste Raw Text & Parse</div>
+            <div class="parse-area">
+                <label for="rawText">Paste your book info here (e.g., from a scanned page):</label>
+                <textarea id="rawText" placeholder="Title: Wuthering Heights&#10;Author: Emily Brontë&#10;Publisher: Oxford Press&#10;Publication Date: 1921&#10;..."></textarea>
+                <div class="row" style="justify-content:flex-end; margin-top:8px;">
+                    <button class="btn btn-secondary" id="parseBtn">🔍 Parse Text</button>
                 </div>
-                <div class="col">
-                    <label>✍️ Author</label>
-                    <input id="author" placeholder="e.g. Emily Brontë" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <label>🏛️ Publisher</label>
-                    <input id="publisher" placeholder="e.g. Oxford Press" />
-                </div>
-                <div class="col">
-                    <label>📅 Publication Year</label>
-                    <input id="year" placeholder="e.g. 1921" />
+                <div style="font-size:13px; color:#6b4f2e; margin-top:6px;">
+                    <strong>Supported keywords:</strong> Title, Author, Publisher, Publication Date, Year, Edition, Binding, Condition, Printed in, Country, Notes.
                 </div>
             </div>
+        </div>
+
+        <!-- ======== MANUAL DETAILS ======== -->
+        <div class="section">
+            <div class="section-title">✏️ 3. Check & Repair Fields</div>
             <div class="row">
-                <div class="col">
-                    <label>📑 Edition</label>
-                    <input id="edition" placeholder="e.g. 2nd Edition" />
-                </div>
-                <div class="col">
-                    <label>📘 Binding</label>
-                    <input id="binding" placeholder="e.g. Hardcover" />
-                </div>
+                <div class="col"><label>📘 Book Name</label><input id="bookName" placeholder="e.g. Wuthering Heights" /></div>
+                <div class="col"><label>✍️ Author</label><input id="author" placeholder="e.g. Emily Brontë" /></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>🏛️ Publisher</label><input id="publisher" placeholder="e.g. Oxford Press" /></div>
+                <div class="col"><label>📅 Publication Year</label><input id="year" placeholder="e.g. 1921" /></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>📑 Edition</label><input id="edition" placeholder="e.g. 2nd Edition" /></div>
+                <div class="col"><label>📘 Binding</label><input id="binding" placeholder="e.g. Hardcover" /></div>
             </div>
             <div class="row">
                 <div class="col">
                     <label>📌 Condition</label>
-                    <input id="condition" placeholder="e.g. Very Good" />
+                    <select id="condition">
+                        <option value="">-- Select Condition --</option>
+                        <option value="As New / Mint">As New / Mint</option>
+                        <option value="Fine">Fine</option>
+                        <option value="Near Fine">Near Fine</option>
+                        <option value="Very Good+">Very Good+</option>
+                        <option value="Very Good">Very Good</option>
+                        <option value="Good+">Good+</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Poor">Poor</option>
+                        <option value="Ex-Library">Ex-Library</option>
+                        <option value="Reading Copy">Reading Copy</option>
+                        <option value="Binding Copy">Binding Copy</option>
+                    </select>
                 </div>
-                <div class="col">
-                    <label>🌍 Printed in</label>
-                    <input id="printedIn" placeholder="e.g. England" />
-                </div>
+                <div class="col"><label>🌍 Printed in</label><input id="printedIn" placeholder="e.g. England" /></div>
             </div>
             <div class="row">
-                <div class="col-full">
-                    <label>📝 Notes</label>
-                    <input id="notes" placeholder="e.g. First edition, rare" />
-                </div>
+                <div class="col-full"><label>📝 Notes</label><input id="notes" placeholder="e.g. First edition, rare" /></div>
             </div>
             <div class="serial-group">
-                <label>🔢 Serial Number (Manual)</label>
+                <label>🔢 Serial Number</label>
                 <input id="serialNo" placeholder="e.g. FRB-001" />
             </div>
         </div>
 
-        <!-- Generate Button -->
-        <div style="text-align:center;">
+        <!-- ======== GENERATE ======== -->
+        <div class="btn-center">
             <button class="btn" id="generateBtn">🖼️ Generate Poster</button>
         </div>
+        <div id="status">⏳ Upload a cover, paste/parse text (optional), check fields, then generate.</div>
 
-        <!-- Poster Preview -->
-        <div class="poster-preview">
+        <!-- ======== POSTER ======== -->
+        <div class="poster-wrap">
             <canvas id="posterCanvas" width="800" height="800"></canvas>
         </div>
 
-        <!-- SECTION 3: Social Caption -->
+        <!-- ======== CAPTION ======== -->
         <div class="section">
-            <div class="section-title">📱 3. Instagram / Facebook Caption</div>
-            <button class="btn btn-secondary" id="generateCaptionBtn">✨ Generate Caption</button>
+            <div class="section-title">📱 4. Instagram / Facebook Caption</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                <button class="btn btn-secondary" id="genCaptionBtn">✨ Generate Caption</button>
+                <button class="btn btn-green" id="copyCaptionBtn">📋 Copy</button>
+            </div>
             <div class="caption-box">
-                <textarea id="captionOutput" readonly>Click 'Generate Caption' to create your post...</textarea>
-                <button class="btn" id="copyCaptionBtn" style="margin-top:10px; background:#3d7a4a;">📋 Copy Caption</button>
+                <textarea id="captionOutput" readonly>Fill in the details, generate the poster, then click 'Generate Caption'.</textarea>
             </div>
         </div>
 
@@ -358,27 +299,15 @@
 
     <script>
         (function() {
-            // ============================================================
-            // 🔥 CONFIGURE YOUR LOGO PATH HERE – CHANGE ONLY THIS LINE!
-            // ============================================================
-            const LOGO_PATH = 'images/logo.png'; // <-- Change this to your logo path
+            // ===== CONFIG =====
+            const LOGO_PATH = 'images/logo.png';
 
-            // ============================================================
-            // DOM refs
-            const pdfUpload = document.getElementById('pdfUpload');
-            const thumbContainer = document.getElementById('thumbContainer');
-            const coverPageInput = document.getElementById('coverPage');
-            const infoPageInput = document.getElementById('infoPage');
-            const scanBtn = document.getElementById('scanBtn');
-            const generateBtn = document.getElementById('generateBtn');
-            const genCaptionBtn = document.getElementById('generateCaptionBtn');
-            const copyCaptionBtn = document.getElementById('copyCaptionBtn');
-            const captionOutput = document.getElementById('captionOutput');
-            const statusDiv = document.getElementById('status');
-            const canvas = document.getElementById('posterCanvas');
-            const ctx = canvas.getContext('2d');
+            // ===== DOM REFS =====
+            const coverUpload = document.getElementById('coverUpload');
+            const coverPreviewArea = document.getElementById('coverPreviewArea');
+            const coverPreviewImg = document.getElementById('coverPreviewImg');
+            const coverFileName = document.getElementById('coverFileName');
 
-            // Input fields
             const bookName = document.getElementById('bookName');
             const author = document.getElementById('author');
             const publisher = document.getElementById('publisher');
@@ -390,424 +319,301 @@
             const notes = document.getElementById('notes');
             const serialNo = document.getElementById('serialNo');
 
-            // Logo status elements
-            const logoStatusDot = document.getElementById('logoStatusDot');
-            const logoStatusText = document.getElementById('logoStatusText');
+            const rawText = document.getElementById('rawText');
+            const parseBtn = document.getElementById('parseBtn');
+            const generateBtn = document.getElementById('generateBtn');
+            const genCaptionBtn = document.getElementById('genCaptionBtn');
+            const copyCaptionBtn = document.getElementById('copyCaptionBtn');
+            const captionOutput = document.getElementById('captionOutput');
+            const statusDiv = document.getElementById('status');
 
-            let pdfDoc = null;
-            let pagesData = [];
+            const canvas = document.getElementById('posterCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let coverImageData = null;
             let logoImage = null;
             let logoLoaded = false;
 
-            // ============================================================
-            // LOAD LOGO FROM FIXED PATH (ONCE)
-            // ============================================================
+            // ===== LOAD LOGO =====
             function loadLogo() {
-                logoImage = new Image();
-                logoImage.crossOrigin = 'anonymous';
-                logoImage.onload = function() {
-                    logoLoaded = true;
-                    logoStatusDot.className = 'dot green';
-                    logoStatusText.textContent = '✅ Logo loaded: ' + LOGO_PATH;
-                    console.log('✅ Logo loaded successfully from:', LOGO_PATH);
-                };
-                logoImage.onerror = function() {
-                    logoLoaded = false;
-                    logoStatusDot.className = 'dot gray';
-                    logoStatusText.textContent = '⚠️ Logo not found at: ' + LOGO_PATH + ' (using placeholder)';
-                    console.warn('⚠️ Logo not found at:', LOGO_PATH);
-                    // Try to create a fallback colored circle
-                    const fallbackCanvas = document.createElement('canvas');
-                    fallbackCanvas.width = 200;
-                    fallbackCanvas.height = 200;
-                    const fCtx = fallbackCanvas.getContext('2d');
-                    fCtx.beginPath();
-                    fCtx.arc(100, 100, 90, 0, 2 * Math.PI);
-                    fCtx.fillStyle = '#8b5e3c';
-                    fCtx.fill();
-                    fCtx.fillStyle = '#f5ede4';
-                    fCtx.font = 'bold 28px Arial';
-                    fCtx.textAlign = 'center';
-                    fCtx.textBaseline = 'middle';
-                    fCtx.fillText('FRB', 100, 105);
-                    logoImage.src = fallbackCanvas.toDataURL();
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() { logoImage = img; logoLoaded = true; };
+                img.onerror = function() {
+                    const c = document.createElement('canvas');
+                    c.width = 200; c.height = 200;
+                    const cx = c.getContext('2d');
+                    cx.beginPath(); cx.arc(100,100,90,0,2*Math.PI);
+                    cx.fillStyle = '#8b5e3c'; cx.fill();
+                    cx.fillStyle = '#f5ede4'; cx.font = 'bold 32px Arial';
+                    cx.textAlign = 'center'; cx.textBaseline = 'middle';
+                    cx.fillText('FRB', 100, 105);
+                    logoImage = new Image();
+                    logoImage.src = c.toDataURL();
                     logoLoaded = true;
                 };
-                logoImage.src = LOGO_PATH;
+                img.src = LOGO_PATH;
             }
-
-            // Load logo immediately
             loadLogo();
 
-            // ============================================================
-            // PDF Load
-            // ============================================================
-            pdfUpload.addEventListener('change', function(e) {
+            // ===== COVER UPLOAD =====
+            coverUpload.addEventListener('change', function(e) {
                 const file = this.files[0];
                 if (!file) return;
                 const reader = new FileReader();
-                reader.onload = function() {
-                    const typedarray = new Uint8Array(this.result);
-                    pdfjsLib.getDocument(typedarray).promise.then(function(doc) {
-                        pdfDoc = doc;
-                        pagesData = [];
-                        thumbContainer.innerHTML = '';
-                        statusDiv.innerText = '✅ PDF loaded. Total pages: ' + doc.numPages;
-                        for (let i = 1; i <= doc.numPages; i++) {
-                            doc.getPage(i).then(function(page) {
-                                const viewport = page.getViewport({ scale: 0.5 });
-                                const tmpCanvas = document.createElement('canvas');
-                                const tmpCtx = tmpCanvas.getContext('2d');
-                                tmpCanvas.width = viewport.width;
-                                tmpCanvas.height = viewport.height;
-                                page.render({ canvasContext: tmpCtx, viewport: viewport }).promise
-                                    .then(() => {
-                                        pagesData[i] = tmpCanvas;
-                                        const img = document.createElement('img');
-                                        img.src = tmpCanvas.toDataURL();
-                                        img.style.width = '70px';
-                                        img.style.border = '2px solid #a67c52';
-                                        img.style.borderRadius = '6px';
-                                        img.style.margin = '2px';
-                                        img.title = 'Page ' + i;
-                                        thumbContainer.appendChild(img);
-                                    });
-                            });
-                        }
-                        document.getElementById('coverPage').max = doc.numPages;
-                        document.getElementById('infoPage').max = doc.numPages;
-                    }).catch(function(err) {
-                        statusDiv.innerText = '❌ Error loading PDF: ' + err;
-                    });
+                reader.onload = function(ev) {
+                    const img = new Image();
+                    img.onload = function() {
+                        coverImageData = img;
+                        coverPreviewArea.style.display = 'flex';
+                        coverPreviewImg.src = ev.target.result;
+                        coverFileName.textContent = file.name;
+                        statusDiv.innerText = '✅ Cover photo loaded: ' + file.name;
+                    };
+                    img.src = ev.target.result;
                 };
-                reader.readAsArrayBuffer(file);
+                reader.readAsDataURL(file);
             });
 
-            // ============================================================
-            // OCR Scan
-            // ============================================================
-            scanBtn.addEventListener('click', function() {
-                const pageNum = parseInt(infoPageInput.value);
-                if (!pagesData[pageNum]) {
-                    statusDiv.innerText = '❌ Please upload PDF and select a valid page number.';
+            // ===== PARSE TEXT =====
+            parseBtn.addEventListener('click', function() {
+                const text = rawText.value;
+                if (!text.trim()) {
+                    alert('Please paste some text first.');
                     return;
                 }
-                const imgData = pagesData[pageNum].toDataURL();
-                statusDiv.innerText = '⏳ OCR scanning... Please wait.';
-                Tesseract.recognize(imgData, 'eng', {
-                    logger: function(m) {
-                        if (m.status === 'recognizing text')
-                            statusDiv.innerText = '⏳ Progress: ' + Math.round(m.progress * 100) + '%';
-                    }
-                }).then(function(result) {
-                    const raw = result.data.text.trim();
-                    statusDiv.innerText = '✅ OCR complete! Review extracted text below.\n📝 Found:\n' +
-                        raw.substring(0, 600) + (raw.length > 600 ? '...' : '') +
-                        '\n\n(Repair fields manually if needed)';
-
-                    // Auto-fill helpers
-                    const yearMatch = raw.match(/\b(19[0-9]{2}|20[0-9]{2})\b/);
-                    if (yearMatch && !year.value) year.value = yearMatch[0];
-
-                    const edMatch = raw.match(/(\d+)(?:st|nd|rd|th)?\s*Edition/i);
-                    if (edMatch && !edition.value) edition.value = edMatch[0];
-
-                    const pubRegex = /(?:Published by|Publisher|Press|Printed by)\s*[:]*\s*([^\n,]+)/i;
-                    const pubMatch = raw.match(pubRegex);
-                    if (pubMatch && !publisher.value) publisher.value = pubMatch[1].trim();
-
-                    const printedRegex = /Printed in\s*[:]*\s*([^\n,]+)/i;
-                    const printedMatch = raw.match(printedRegex);
-                    if (printedMatch && !printedIn.value) printedIn.value = printedMatch[1].trim();
-
-                    const bindRegex = /\b(Hardcover|Paperback|Cloth|Leather|Softcover)\b/i;
-                    const bindMatch = raw.match(bindRegex);
-                    if (bindMatch && !binding.value) binding.value = bindMatch[0];
-
-                    const lines = raw.split('\n').map(function(l) { return l.trim(); }).filter(function(l) {
-                        return l.length > 0;
-                    });
-                    if (!bookName.value && lines.length > 0) {
-                        for (var i = 0; i < lines.length; i++) {
-                            var line = lines[i];
-                            if (line.length > 10 && !line.match(/^\d+$/) && !line.match(
-                                /^(published|printed|edition|condition)/i)) {
-                                bookName.value = line;
-                                break;
+                const rules = [
+                    { pattern: /(?:Title|Book|Name)\s*[:]\s*(.+)/i, field: bookName },
+                    { pattern: /(?:Author|By)\s*[:]\s*(.+)/i, field: author },
+                    { pattern: /(?:Publisher|Published by)\s*[:]\s*(.+)/i, field: publisher },
+                    { pattern: /(?:Publication Date|Year)\s*[:]\s*(.+)/i, field: year },
+                    { pattern: /Edition\s*[:]\s*(.+)/i, field: edition },
+                    { pattern: /Binding\s*[:]\s*(.+)/i, field: binding },
+                    { pattern: /Condition\s*[:]\s*(.+)/i, field: condition },
+                    { pattern: /(?:Printed in|Country)\s*[:]\s*(.+)/i, field: printedIn },
+                    { pattern: /Notes\s*[:]\s*(.+)/i, field: notes },
+                ];
+                let found = 0;
+                for (let r of rules) {
+                    const match = text.match(r.pattern);
+                    if (match && match[1] && match[1].trim()) {
+                        // For condition dropdown, check if the parsed value exists in options, otherwise let it be manually selected
+                        if (r.field === condition) {
+                            const val = match[1].trim();
+                            const options = condition.options;
+                            let exists = false;
+                            for (let opt of options) {
+                                if (opt.value.toLowerCase() === val.toLowerCase()) {
+                                    exists = true;
+                                    break;
+                                }
                             }
+                            if (exists) {
+                                condition.value = val;
+                            } else {
+                                // If not found, set to empty and user can manually pick
+                                condition.value = '';
+                                // Still notify we found it, but user picks from dropdown
+                                statusDiv.innerText = '⚠️ Condition "'+val+'" not in dropdown list. Please select manually.';
+                            }
+                        } else {
+                            r.field.value = match[1].trim();
                         }
+                        found++;
                     }
-                    if (!author.value) {
-                        var byLine = lines.find(function(l) { return /by\s+[A-Z]/.test(l) || /author/i.test(l); });
-                        if (byLine) author.value = byLine.replace(/by|author/i, '').trim();
-                    }
-                }).catch(function(err) {
-                    statusDiv.innerText = '❌ OCR Error: ' + err;
-                    console.error(err);
-                });
+                }
+                if (found === 0) {
+                    statusDiv.innerText = '⚠️ No supported keywords found. Please use labels like "Title:", "Author:", etc.';
+                } else {
+                    statusDiv.innerText = '✅ Parsed ' + found + ' fields. Please review and repair if needed.';
+                }
             });
 
-            // ============================================================
-            // Generate Poster (Rectangular Cover + Circular Logo)
-            // ============================================================
+            // ===== GENERATE POSTER =====
             generateBtn.addEventListener('click', function() {
-                var coverIdx = parseInt(coverPageInput.value);
-                if (!pagesData[coverIdx]) {
-                    alert('Please select a valid cover page number.');
+                if (!coverImageData) {
+                    alert('Please upload a cover photo first.');
                     return;
                 }
-                var coverImg = pagesData[coverIdx];
-                var w = 800,
-                    h = 800;
-                canvas.width = w;
-                canvas.height = h;
+                const w = 800, h = 800;
+                canvas.width = w; canvas.height = h;
 
-                // Vintage background
-                var grad = ctx.createLinearGradient(0, 0, w, h);
+                const grad = ctx.createLinearGradient(0,0,w,h);
                 grad.addColorStop(0, '#f5efe6');
                 grad.addColorStop(1, '#e5d9ca');
                 ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
+                ctx.fillRect(0,0,w,h);
 
-                // Outer borders
                 ctx.strokeStyle = '#4a3422';
                 ctx.lineWidth = 20;
-                ctx.strokeRect(15, 15, w - 30, h - 30);
+                ctx.strokeRect(15,15,w-30,h-30);
                 ctx.strokeStyle = '#b08862';
                 ctx.lineWidth = 4;
-                ctx.strokeRect(33, 33, w - 66, h - 66);
+                ctx.strokeRect(33,33,w-66,h-66);
 
-                // ----- Header (Page Name) -----
                 ctx.font = 'bold 32px "Times New Roman", serif';
                 ctx.fillStyle = '#3e2c1b';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
                 ctx.fillText('Findrarebooks', 400, 22);
 
-                // ----- Circular LOGO at Top-Right Corner -----
+                const logoSize = 75;
+                const lx = w - logoSize - 28, ly = 15;
                 if (logoLoaded && logoImage) {
                     try {
-                        var logoSize = 75;
-                        var logoX = w - logoSize - 28;
-                        var logoY = 15;
-                        // Clip to circle
                         ctx.save();
                         ctx.beginPath();
-                        ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, 2 * Math.PI);
+                        ctx.arc(lx+logoSize/2, ly+logoSize/2, logoSize/2, 0, 2*Math.PI);
                         ctx.closePath();
                         ctx.clip();
-                        ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+                        ctx.drawImage(logoImage, lx, ly, logoSize, logoSize);
                         ctx.restore();
-                        // Outer ring
                         ctx.beginPath();
-                        ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, 2 * Math.PI);
+                        ctx.arc(lx+logoSize/2, ly+logoSize/2, logoSize/2, 0, 2*Math.PI);
                         ctx.strokeStyle = '#4a3422';
                         ctx.lineWidth = 5;
                         ctx.stroke();
-                        // Inner decorative ring
                         ctx.beginPath();
-                        ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 - 5, 0, 2 * Math.PI);
+                        ctx.arc(lx+logoSize/2, ly+logoSize/2, logoSize/2-5, 0, 2*Math.PI);
                         ctx.strokeStyle = '#b08862';
                         ctx.lineWidth = 2;
                         ctx.stroke();
-                    } catch (e) {
-                        console.warn('Logo draw skipped', e);
-                    }
-                } else {
-                    // Placeholder circle if logo not loaded
-                    var logoSize = 75;
-                    var logoX = w - logoSize - 28;
-                    var logoY = 15;
-                    ctx.beginPath();
-                    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#d6c4b0';
-                    ctx.fill();
-                    ctx.strokeStyle = '#4a3422';
-                    ctx.lineWidth = 4;
-                    ctx.stroke();
-                    ctx.font = 'bold 14px Arial';
-                    ctx.fillStyle = '#4a3422';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('LOGO', logoX + logoSize / 2, logoY + logoSize / 2);
+                    } catch(e) {}
                 }
 
-                // ----- Right Side: BOOK COVER (Rectangular) -----
-                var rightX = 420,
-                    rightW = 300,
-                    rightH = 400;
-                var imgAspect = coverImg.width / coverImg.height;
-                var drawW = rightW,
-                    drawH = rightW / imgAspect;
-                if (drawH > rightH) { drawH = rightH;
-                    drawW = rightH * imgAspect; }
-                var imgX = rightX + (rightW - drawW) / 2;
-                var imgY = 120 + (rightH - drawH) / 2;
-
-                // Shadow
+                const rightX = 420, rightW = 300, rightH = 400;
+                const aspect = coverImageData.width / coverImageData.height;
+                let drawW = rightW, drawH = rightW / aspect;
+                if (drawH > rightH) { drawH = rightH; drawW = rightH * aspect; }
+                const imgX = rightX + (rightW - drawW)/2;
+                const imgY = 120 + (rightH - drawH)/2;
                 ctx.save();
                 ctx.shadowColor = 'rgba(0,0,0,0.5)';
                 ctx.shadowBlur = 20;
                 ctx.shadowOffsetX = 5;
                 ctx.shadowOffsetY = 5;
-                ctx.drawImage(coverImg, imgX, imgY, drawW, drawH);
+                ctx.drawImage(coverImageData, imgX, imgY, drawW, drawH);
                 ctx.restore();
-
-                // Frame
                 ctx.strokeStyle = '#4a3422';
                 ctx.lineWidth = 8;
-                ctx.strokeRect(imgX - 8, imgY - 8, drawW + 16, drawH + 16);
+                ctx.strokeRect(imgX-8, imgY-8, drawW+16, drawH+16);
                 ctx.strokeStyle = '#b08862';
                 ctx.lineWidth = 2;
-                ctx.strokeRect(imgX - 4, imgY - 4, drawW + 8, drawH + 8);
+                ctx.strokeRect(imgX-4, imgY-4, drawW+8, drawH+8);
 
-                // ----- Left Side: Text Details -----
-                var leftX = 40,
-                    leftW = 330;
-                var yPos = 110;
+                const leftX = 40, leftW = 330;
+                let yPos = 110;
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'top';
-
-                // Book Name
                 ctx.font = 'bold 28px "Times New Roman", serif';
                 ctx.fillStyle = '#2c1a0c';
                 ctx.fillText(bookName.value || 'Book Name', leftX, yPos);
                 yPos += 42;
-
-                // Author
                 ctx.font = 'italic 22px "Times New Roman", serif';
                 ctx.fillStyle = '#4a3321';
                 ctx.fillText('by ' + (author.value || 'Author'), leftX, yPos);
                 yPos += 40;
-
-                // Publisher
                 ctx.font = '17px "Times New Roman", serif';
                 ctx.fillStyle = '#3e2c1b';
                 ctx.fillText('Publisher: ' + (publisher.value || ''), leftX, yPos);
                 yPos += 28;
-
-                // Year
                 ctx.fillText('Publication Date: ' + (year.value || ''), leftX, yPos);
                 yPos += 28;
-
-                // Binding
                 ctx.fillText('Binding: ' + (binding.value || ''), leftX, yPos);
                 yPos += 28;
-
-                // Condition
                 ctx.fillText('Condition: ' + (condition.value || ''), leftX, yPos);
                 yPos += 28;
-
-                // Edition
                 ctx.fillText('Edition: ' + (edition.value || ''), leftX, yPos);
                 yPos += 28;
-
-                // Printed in
                 ctx.fillText('Printed in: ' + (printedIn.value || ''), leftX, yPos);
                 yPos += 30;
 
-                // Notes (wrap)
-                var notesText = notes.value || '';
+                const notesText = notes.value || '';
                 if (notesText.length > 0) {
                     ctx.font = '15px "Times New Roman", serif';
                     ctx.fillStyle = '#4a3321';
-                    var words = notesText.split(' ');
-                    var line = 'Notes: ';
-                    var maxWidth = leftW - 10;
-                    for (var i = 0; i < words.length; i++) {
-                        var word = words[i];
-                        var testLine = line + word + ' ';
-                        if (ctx.measureText(testLine).width > maxWidth && line !== 'Notes: ') {
+                    const words = notesText.split(' ');
+                    let line = 'Notes: ';
+                    const maxW = leftW - 10;
+                    for (let i=0; i<words.length; i++) {
+                        const test = line + words[i] + ' ';
+                        if (ctx.measureText(test).width > maxW && line !== 'Notes: ') {
                             ctx.fillText(line, leftX, yPos);
                             yPos += 24;
-                            line = '       ' + word + ' ';
+                            line = '       ' + words[i] + ' ';
                         } else {
-                            line = testLine;
+                            line = test;
                         }
                     }
                     ctx.fillText(line, leftX, yPos);
                     yPos += 30;
                 }
 
-                // ----- Bottom: Serial Number + Hashtag -----
-                var bottomY = h - 70;
+                const bottomY = h - 70;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.font = 'bold 16px monospace';
                 ctx.fillStyle = '#2c1a0c';
-                ctx.fillText('SERIAL NO.', 200, bottomY - 10);
-                var boxX = 100,
-                    boxY = bottomY,
-                    boxW = 200,
-                    boxH = 40;
+                ctx.fillText('SERIAL NO.', 200, bottomY-10);
+                const bx = 100, by = bottomY, bw = 200, bh = 40;
                 ctx.strokeStyle = '#3e2c1b';
                 ctx.lineWidth = 3;
-                ctx.strokeRect(boxX, boxY, boxW, boxH);
+                ctx.strokeRect(bx, by, bw, bh);
                 ctx.fillStyle = '#fef8f0';
-                ctx.fillRect(boxX + 2, boxY + 2, boxW - 4, boxH - 4);
+                ctx.fillRect(bx+2, by+2, bw-4, bh-4);
                 ctx.font = 'bold 20px monospace';
                 ctx.fillStyle = '#1f1208';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(serialNo.value || 'FRB-000', boxX + boxW / 2, boxY + boxH / 2);
+                ctx.fillText(serialNo.value || 'FRB-000', bx + bw/2, by + bh/2);
 
-                // Hashtag
                 ctx.font = 'bold 18px "Times New Roman", serif';
                 ctx.fillStyle = '#7a5f44';
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('#FindRareBooks', w - 30, bottomY + 20);
+                ctx.fillText('#FindRareBooks', w-30, bottomY+20);
 
-                // Footer
                 ctx.font = '12px "Times New Roman", serif';
                 ctx.fillStyle = '#a08060';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
-                ctx.fillText('© Find Rare Books • UK Vintage Collection', 400, h - 10);
+                ctx.fillText('© Find Rare Books • UK Vintage Collection', 400, h-10);
 
                 statusDiv.innerText = '✅ Poster generated successfully!';
             });
 
-            // ============================================================
-            // Caption Generator
-            // ============================================================
+            // ===== CAPTION =====
             genCaptionBtn.addEventListener('click', function() {
-                var name = bookName.value || 'Rare Book';
-                var auth = author.value || 'Unknown Author';
-                var pub = publisher.value || 'Unknown Publisher';
-                var yr = year.value || 'Unknown Year';
-                var ed = edition.value ? ' (' + edition.value + ')' : '';
-                var bind = binding.value ? 'Binding: ' + binding.value + '. ' : '';
-                var cond = condition.value ? 'Condition: ' + condition.value + '. ' : '';
-                var notesTxt = notes.value ? 'Notes: ' + notes.value + '. ' : '';
-
-                var title = '📖 Book of the Day: ' + name;
-                var desc = '🌟 We\'re delighted to present "' + name + '" by ' + auth + '. ' +
-                    'Published in ' + yr + ' by ' + pub + ed + '. ' +
-                    bind + cond + notesTxt +
+                const name = bookName.value || 'Rare Book';
+                const auth = author.value || 'Unknown Author';
+                const pub = publisher.value || 'Unknown Publisher';
+                const yr = year.value || 'Unknown Year';
+                const ed = edition.value ? ' ('+edition.value+')' : '';
+                const bind = binding.value ? 'Binding: '+binding.value+'. ' : '';
+                const cond = condition.value ? 'Condition: '+condition.value+'. ' : '';
+                const notesTxt = notes.value ? 'Notes: '+notes.value+'. ' : '';
+                const title = '📖 Book of the Day: ' + name;
+                const desc = '🌟 We\'re delighted to present "'+name+'" by '+auth+'. ' +
+                    'Published in '+yr+' by '+pub+ed+'. ' +
+                    bind+cond+notesTxt+
                     'A true gem for collectors. Don\'t miss out! 📚✨\n\n' +
                     '🔗 Visit our page for more rare finds.';
-                var hashtags = '#FindRareBooks #RareBooks #BookCollector #VintageBooks #AntiqueBooks #Bookstagram #InstaBooks #' +
-                    name.replace(/\s/g, '') + ' #' + auth.replace(/\s/g, '');
-                var full = title + '\n\n' + desc + '\n\n' + hashtags;
-                captionOutput.value = full;
+                const hashtags = '#FindRareBooks #RareBooks #BookCollector #VintageBooks #AntiqueBooks #Bookstagram #InstaBooks #'+
+                    name.replace(/\s/g,'')+' #'+auth.replace(/\s/g,'');
+                captionOutput.value = title+'\n\n'+desc+'\n\n'+hashtags;
             });
 
-            // ============================================================
-            // Copy Caption
-            // ============================================================
             copyCaptionBtn.addEventListener('click', function() {
+                const text = captionOutput.value;
+                if (!text || text.trim() === 'Fill in the details...') {
+                    alert('Please generate a caption first.');
+                    return;
+                }
                 if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(captionOutput.value).then(function() {
-                        alert('✅ Caption copied! Paste it on Instagram/Facebook.');
-                    }).catch(function() {
-                        captionOutput.select();
-                        document.execCommand('copy');
-                        alert('✅ Copied!');
+                    navigator.clipboard.writeText(text).then(() => alert('✅ Copied!')).catch(() => {
+                        captionOutput.select(); document.execCommand('copy'); alert('✅ Copied!');
                     });
                 } else {
-                    captionOutput.select();
-                    document.execCommand('copy');
-                    alert('✅ Copied!');
+                    captionOutput.select(); document.execCommand('copy'); alert('✅ Copied!');
                 }
             });
 
