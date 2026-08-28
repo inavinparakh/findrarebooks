@@ -91,6 +91,7 @@
         .btn-green { background: #3d7a4a; }
         .btn-green:hover { background: #2e5f39; }
         .btn-center { text-align: center; margin: 10px 0; }
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
         .poster-wrap {
             display: flex;
             justify-content: center;
@@ -191,6 +192,7 @@
             .app { padding: 15px; }
             .col { flex: 1 1 100%; }
             .cover-preview { flex-direction: column; align-items: flex-start; }
+            .btn-group { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
@@ -269,9 +271,12 @@
             </div>
         </div>
 
-        <!-- ======== GENERATE ======== -->
+        <!-- ======== GENERATE & DOWNLOAD ======== -->
         <div class="btn-center">
-            <button class="btn" id="generateBtn">🖼️ Generate Poster</button>
+            <div class="btn-group">
+                <button class="btn" id="generateBtn">🖼️ Generate Poster</button>
+                <button class="btn btn-green" id="downloadBtn">⬇️ Download Poster (PNG)</button>
+            </div>
         </div>
         <div id="status">⏳ Upload a cover, paste/parse text (optional), check fields, then generate.</div>
 
@@ -322,6 +327,7 @@
             const rawText = document.getElementById('rawText');
             const parseBtn = document.getElementById('parseBtn');
             const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
             const genCaptionBtn = document.getElementById('genCaptionBtn');
             const copyCaptionBtn = document.getElementById('copyCaptionBtn');
             const captionOutput = document.getElementById('captionOutput');
@@ -333,6 +339,27 @@
             let coverImageData = null;
             let logoImage = null;
             let logoLoaded = false;
+
+            // ===== HELPER: Wrap text =====
+            function wrapText(ctx, text, maxWidth) {
+                if (!text) return [];
+                const words = text.split(' ');
+                let lines = [];
+                let currentLine = '';
+                for (let i = 0; i < words.length; i++) {
+                    const word = words[i];
+                    const testLine = currentLine ? currentLine + ' ' + word : word;
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && currentLine !== '') {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine) lines.push(currentLine);
+                return lines;
+            }
 
             // ===== LOAD LOGO =====
             function loadLogo() {
@@ -397,7 +424,6 @@
                 for (let r of rules) {
                     const match = text.match(r.pattern);
                     if (match && match[1] && match[1].trim()) {
-                        // For condition dropdown, check if the parsed value exists in options, otherwise let it be manually selected
                         if (r.field === condition) {
                             const val = match[1].trim();
                             const options = condition.options;
@@ -411,10 +437,8 @@
                             if (exists) {
                                 condition.value = val;
                             } else {
-                                // If not found, set to empty and user can manually pick
                                 condition.value = '';
-                                // Still notify we found it, but user picks from dropdown
-                                statusDiv.innerText = '⚠️ Condition "'+val+'" not in dropdown list. Please select manually.';
+                                statusDiv.innerText = '⚠️ Condition "'+val+'" not in dropdown. Please select manually.';
                             }
                         } else {
                             r.field.value = match[1].trim();
@@ -423,9 +447,9 @@
                     }
                 }
                 if (found === 0) {
-                    statusDiv.innerText = '⚠️ No supported keywords found. Please use labels like "Title:", "Author:", etc.';
+                    statusDiv.innerText = '⚠️ No supported keywords found. Use "Title:", "Author:", etc.';
                 } else {
-                    statusDiv.innerText = '✅ Parsed ' + found + ' fields. Please review and repair if needed.';
+                    statusDiv.innerText = '✅ Parsed ' + found + ' fields. Review and repair if needed.';
                 }
             });
 
@@ -435,15 +459,18 @@
                     alert('Please upload a cover photo first.');
                     return;
                 }
+
                 const w = 800, h = 800;
                 canvas.width = w; canvas.height = h;
 
+                // ---- BACKGROUND ----
                 const grad = ctx.createLinearGradient(0,0,w,h);
                 grad.addColorStop(0, '#f5efe6');
                 grad.addColorStop(1, '#e5d9ca');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0,0,w,h);
 
+                // ---- BORDERS ----
                 ctx.strokeStyle = '#4a3422';
                 ctx.lineWidth = 20;
                 ctx.strokeRect(15,15,w-30,h-30);
@@ -451,12 +478,14 @@
                 ctx.lineWidth = 4;
                 ctx.strokeRect(33,33,w-66,h-66);
 
+                // ---- HEADER ----
                 ctx.font = 'bold 32px "Times New Roman", serif';
                 ctx.fillStyle = '#3e2c1b';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
                 ctx.fillText('Findrarebooks', 400, 22);
 
+                // ---- LOGO (top-right) ----
                 const logoSize = 75;
                 const lx = w - logoSize - 28, ly = 15;
                 if (logoLoaded && logoImage) {
@@ -481,12 +510,23 @@
                     } catch(e) {}
                 }
 
-                const rightX = 420, rightW = 300, rightH = 400;
+                // ---- LAYOUT DIMENSIONS ----
+                const leftX = 40;
+                const leftMaxWidth = 330;
+                const rightX = 420;
+                const rightW = 300;
+                const rightH = 400;
+                const startY = 100;
+                let yPos = startY;
+                const lineHeight = 28;
+
+                // ---- RIGHT: COVER PHOTO ----
                 const aspect = coverImageData.width / coverImageData.height;
                 let drawW = rightW, drawH = rightW / aspect;
                 if (drawH > rightH) { drawH = rightH; drawW = rightH * aspect; }
                 const imgX = rightX + (rightW - drawW)/2;
-                const imgY = 120 + (rightH - drawH)/2;
+                const imgY = 110 + (rightH - drawH)/2;
+
                 ctx.save();
                 ctx.shadowColor = 'rgba(0,0,0,0.5)';
                 ctx.shadowBlur = 20;
@@ -501,60 +541,87 @@
                 ctx.lineWidth = 2;
                 ctx.strokeRect(imgX-4, imgY-4, drawW+8, drawH+8);
 
-                const leftX = 40, leftW = 330;
-                let yPos = 110;
+                // ---- LEFT: TEXT ----
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'top';
+
+                // Book Name (bold, large)
                 ctx.font = 'bold 28px "Times New Roman", serif';
                 ctx.fillStyle = '#2c1a0c';
-                ctx.fillText(bookName.value || 'Book Name', leftX, yPos);
-                yPos += 42;
+                const nameLines = wrapText(ctx, bookName.value || 'Book Name', leftMaxWidth);
+                for (let line of nameLines) {
+                    ctx.fillText(line, leftX, yPos);
+                    yPos += 38;
+                }
+
+                // Author (italic)
                 ctx.font = 'italic 22px "Times New Roman", serif';
                 ctx.fillStyle = '#4a3321';
-                ctx.fillText('by ' + (author.value || 'Author'), leftX, yPos);
-                yPos += 40;
+                const authorText = 'by ' + (author.value || 'Author');
+                ctx.fillText(authorText, leftX, yPos);
+                yPos += 36;
+
+                // Publisher
                 ctx.font = '17px "Times New Roman", serif';
                 ctx.fillStyle = '#3e2c1b';
                 ctx.fillText('Publisher: ' + (publisher.value || ''), leftX, yPos);
-                yPos += 28;
-                ctx.fillText('Publication Date: ' + (year.value || ''), leftX, yPos);
-                yPos += 28;
-                ctx.fillText('Binding: ' + (binding.value || ''), leftX, yPos);
-                yPos += 28;
-                ctx.fillText('Condition: ' + (condition.value || ''), leftX, yPos);
-                yPos += 28;
-                ctx.fillText('Edition: ' + (edition.value || ''), leftX, yPos);
-                yPos += 28;
-                ctx.fillText('Printed in: ' + (printedIn.value || ''), leftX, yPos);
-                yPos += 30;
+                yPos += lineHeight;
 
-                const notesText = notes.value || '';
-                if (notesText.length > 0) {
-                    ctx.font = '15px "Times New Roman", serif';
-                    ctx.fillStyle = '#4a3321';
-                    const words = notesText.split(' ');
-                    let line = 'Notes: ';
-                    const maxW = leftW - 10;
-                    for (let i=0; i<words.length; i++) {
-                        const test = line + words[i] + ' ';
-                        if (ctx.measureText(test).width > maxW && line !== 'Notes: ') {
-                            ctx.fillText(line, leftX, yPos);
-                            yPos += 24;
-                            line = '       ' + words[i] + ' ';
-                        } else {
-                            line = test;
-                        }
+                // Year
+                ctx.fillText('Publication Date: ' + (year.value || ''), leftX, yPos);
+                yPos += lineHeight;
+
+                // Binding
+                ctx.fillText('Binding: ' + (binding.value || ''), leftX, yPos);
+                yPos += lineHeight;
+
+                // Condition (dropdown value)
+                const condVal = condition.value || '';
+                ctx.fillText('Condition: ' + condVal, leftX, yPos);
+                yPos += lineHeight;
+
+                // Edition (wrap if needed)
+                const edText = edition.value || '';
+                if (edText) {
+                    ctx.font = '17px "Times New Roman", serif';
+                    ctx.fillStyle = '#3e2c1b';
+                    const edLines = wrapText(ctx, 'Edition: ' + edText, leftMaxWidth);
+                    for (let line of edLines) {
+                        ctx.fillText(line, leftX, yPos);
+                        yPos += lineHeight;
                     }
-                    ctx.fillText(line, leftX, yPos);
-                    yPos += 30;
                 }
 
+                // Printed in
+                ctx.font = '17px "Times New Roman", serif';
+                ctx.fillStyle = '#3e2c1b';
+                ctx.fillText('Printed in: ' + (printedIn.value || ''), leftX, yPos);
+                yPos += lineHeight;
+
+                // Notes (wrap with smaller font)
+                const notesText = notes.value || '';
+                if (notesText) {
+                    ctx.font = '15px "Times New Roman", serif';
+                    ctx.fillStyle = '#4a3321';
+                    const noteLines = wrapText(ctx, 'Notes: ' + notesText, leftMaxWidth);
+                    for (let line of noteLines) {
+                        ctx.fillText(line, leftX, yPos);
+                        yPos += 24;
+                    }
+                    yPos += 6;
+                }
+
+                // ---- BOTTOM: SERIAL + HASHTAG ----
                 const bottomY = h - 70;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
+
+                // Serial label
                 ctx.font = 'bold 16px monospace';
                 ctx.fillStyle = '#2c1a0c';
                 ctx.fillText('SERIAL NO.', 200, bottomY-10);
+
+                // Serial box
                 const bx = 100, by = bottomY, bw = 200, bh = 40;
                 ctx.strokeStyle = '#3e2c1b';
                 ctx.lineWidth = 3;
@@ -566,19 +633,33 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(serialNo.value || 'FRB-000', bx + bw/2, by + bh/2);
 
+                // Hashtag
                 ctx.font = 'bold 18px "Times New Roman", serif';
                 ctx.fillStyle = '#7a5f44';
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('#FindRareBooks', w-30, bottomY+20);
 
+                // Footer
                 ctx.font = '12px "Times New Roman", serif';
                 ctx.fillStyle = '#a08060';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 ctx.fillText('© Find Rare Books • UK Vintage Collection', 400, h-10);
 
-                statusDiv.innerText = '✅ Poster generated successfully!';
+                statusDiv.innerText = '✅ Poster generated successfully! Click "Download Poster" to save.';
+            });
+
+            // ===== DOWNLOAD POSTER =====
+            downloadBtn.addEventListener('click', function() {
+                const dataUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = 'poster-' + (serialNo.value || 'FRB') + '.png';
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                statusDiv.innerText = '✅ Poster downloaded!';
             });
 
             // ===== CAPTION =====
