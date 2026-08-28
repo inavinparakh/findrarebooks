@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Find Rare Books – Poster Maker</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: #3e2c1b;
+            display: flex;
+            justify-content: center;
+            padding: 30px 15px;
+        }
+        .app {
+            max-width: 960px;
+            width: 100%;
+            background: #f7f0e3;
+            padding: 30px 25px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            border: 2px solid #a67c52;
+        }
+        h1 {
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            color: #3e2c1b;
+            border-bottom: 3px double #a67c52;
+            padding-bottom: 10px;
+        }
+        h1 small { display: block; font-size: 14px; color: #6b4f2e; }
+        .section {
+            background: #fffcf5;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #d6c4b0;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #4e3823;
+            margin-bottom: 15px;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        .col { flex: 1 1 200px; }
+        .col-full { flex: 1 1 100%; }
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: #5a402a;
+            margin-bottom: 4px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbb6a2;
+            border-radius: 8px;
+            background: #fefcf9;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #8b5e3c;
+            box-shadow: 0 0 0 3px rgba(139,94,60,0.2);
+        }
+        textarea { resize: vertical; min-height: 40px; }
+        .btn {
+            background: #6b4f2e;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+            transition: 0.2s;
+        }
+        .btn:hover { background: #4e3823; transform: scale(0.97); }
+        .btn-secondary { background: #a67c52; }
+        .btn-secondary:hover { background: #8b653f; }
+        .btn-green { background: #3d7a4a; }
+        .btn-green:hover { background: #2e5f39; }
+        .btn-center { text-align: center; margin: 10px 0; }
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .poster-wrap {
+            display: flex;
+            justify-content: center;
+            background: #d6c4b0;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px dashed #6b4f2e;
+            margin: 15px 0;
+        }
+        #posterCanvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .cover-preview {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            background: #ede4d6;
+            padding: 12px 18px;
+            border-radius: 40px;
+        }
+        .cover-preview img {
+            width: 80px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #6b4f2e;
+            background: #fff;
+        }
+        .caption-box {
+            background: #2c1e12;
+            color: #f0e3d5;
+            padding: 18px;
+            border-radius: 15px;
+            margin-top: 12px;
+            white-space: pre-wrap;
+        }
+        .caption-box textarea {
+            background: #3d2d1d;
+            color: #f5ede4;
+            border: 1px solid #8b6f52;
+            min-height: 140px;
+            font-size: 14px;
+            line-height: 1.6;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .code-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            background: #eaddcf;
+            padding: 12px 20px;
+            border-radius: 40px;
+            margin-top: 6px;
+        }
+        .code-group label {
+            margin: 0;
+            font-size: 18px;
+            font-family: monospace;
+        }
+        .code-group input {
+            width: 200px;
+            font-family: monospace;
+            font-size: 20px;
+            text-align: center;
+        }
+        #status {
+            background: #e2d5c6;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #3e2c1b;
+            min-height: 44px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .parse-area {
+            background: #f1e8db;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 10px;
+        }
+        .parse-area textarea {
+            background: #fffdf7;
+            min-height: 120px;
+        }
+        .parse-area .row {
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .app { padding: 15px; }
+            .col { flex: 1 1 100%; }
+            .cover-preview { flex-direction: column; align-items: flex-start; }
+            .btn-group { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h1>📖 POSTER MAKER <small>Find Rare Books • UK Vintage</small></h1>
+
+        <!-- ======== UPLOAD COVER ======== -->
+        <div class="section">
+            <div class="section-title">📸 1. Upload Cover Photo</div>
+            <input type="file" id="coverUpload" accept="image/*" />
+            <div class="cover-preview" id="coverPreviewArea" style="display:none;">
+                <span>📷 Cover:</span>
+                <img id="coverPreviewImg" alt="preview" />
+                <span id="coverFileName" style="color:#5a402a;"></span>
+            </div>
+        </div>
+
+        <!-- ======== PASTE & PARSE ======== -->
+        <div class="section">
+            <div class="section-title">📝 2. Paste Raw Text & Parse</div>
+            <div class="parse-area">
+                <label for="rawText">Paste your book info here (e.g., from a scanned page):</label>
+                <textarea id="rawText" placeholder="Title: Wuthering Heights&#10;Author: Emily Brontë&#10;Publisher: Oxford Press&#10;Publication Date: 1921&#10;..."></textarea>
+                <div class="row" style="justify-content:flex-end; margin-top:8px;">
+                    <button class="btn btn-secondary" id="parseBtn">🔍 Parse Text</button>
+                </div>
+                <div style="font-size:13px; color:#6b4f2e; margin-top:6px;">
+                    <strong>Supported keywords:</strong> Title, Author, Publisher, Publication Date, Year, Edition, Binding, Condition, Printed in, Country, Notes.
+                </div>
+            </div>
+        </div>
+
+        <!-- ======== MANUAL DETAILS ======== -->
+        <div class="section">
+            <div class="section-title">✏️ 3. Check & Repair Fields</div>
+            <div class="row">
+                <div class="col"><label>📘 Book Name</label><input id="bookName" placeholder="e.g. Wuthering Heights" /></div>
+                <div class="col"><label>✍️ Author</label><input id="author" placeholder="e.g. Emily Brontë" /></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>🏛️ Publisher</label><input id="publisher" placeholder="e.g. Oxford Press" /></div>
+                <div class="col"><label>📅 Publication Year</label><input id="year" placeholder="e.g. 1921" /></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>📑 Edition</label><input id="edition" placeholder="e.g. 2nd Edition" /></div>
+                <div class="col"><label>📘 Binding</label><input id="binding" placeholder="e.g. Hardcover" /></div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label>📌 Condition</label>
+                    <select id="condition">
+                        <option value="">-- Select Condition --</option>
+                        <option value="As New / Mint">As New / Mint</option>
+                        <option value="Fine">Fine</option>
+                        <option value="Near Fine">Near Fine</option>
+                        <option value="Very Good+">Very Good+</option>
+                        <option value="Very Good">Very Good</option>
+                        <option value="Good+">Good+</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Poor">Poor</option>
+                        <option value="Ex-Library">Ex-Library</option>
+                        <option value="Reading Copy">Reading Copy</option>
+                        <option value="Binding Copy">Binding Copy</option>
+                    </select>
+                </div>
+                <div class="col"><label>🌍 Printed in</label><input id="printedIn" placeholder="e.g. England" /></div>
+            </div>
+            <div class="row">
+                <div class="col-full"><label>📝 Notes</label><input id="notes" placeholder="e.g. First edition, rare" /></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>🔢 Serial Number</label><input id="serialNo" placeholder="e.g. FRB-001" /></div>
+                <div class="col"><label>📚 Book Code (manual)</label><input id="bookCode" placeholder="e.g. BC-001" /></div>
+            </div>
+        </div>
+
+        <!-- ======== GENERATE & DOWNLOAD ======== -->
+        <div class="btn-center">
+            <div class="btn-group">
+                <button class="btn" id="generateBtn">🖼️ Generate Poster</button>
+                <button class="btn btn-green" id="downloadBtn">⬇️ Download Poster (PNG)</button>
+            </div>
+        </div>
+        <div id="status">⏳ Upload a cover, fill details, then generate.</div>
+
+        <!-- ======== POSTER ======== -->
+        <div class="poster-wrap">
+            <canvas id="posterCanvas" width="800" height="800"></canvas>
+        </div>
+
+        <!-- ======== CAPTION ======== -->
+        <div class="section">
+            <div class="section-title">📱 4. Instagram / Facebook Caption</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                <button class="btn btn-secondary" id="genCaptionBtn">✨ Generate Caption</button>
+                <button class="btn btn-green" id="copyCaptionBtn">📋 Copy</button>
+            </div>
+            <div class="caption-box">
+                <textarea id="captionOutput" readonly>Fill in the details, generate the poster, then click 'Generate Caption'.</textarea>
+            </div>
+        </div>
+
+        <footer style="text-align:center; color:#6b4f2e; font-size:13px; margin-top:10px;">
+            @FindRareBooks • Instagram / Facebook
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            // ===== DOM REFS =====
+            const coverUpload = document.getElementById('coverUpload');
+            const coverPreviewArea = document.getElementById('coverPreviewArea');
+            const coverPreviewImg = document.getElementById('coverPreviewImg');
+            const coverFileName = document.getElementById('coverFileName');
+
+            const bookName = document.getElementById('bookName');
+            const author = document.getElementById('author');
+            const publisher = document.getElementById('publisher');
+            const year = document.getElementById('year');
+            const edition = document.getElementById('edition');
+            const binding = document.getElementById('binding');
+            const condition = document.getElementById('condition');
+            const printedIn = document.getElementById('printedIn');
+            const notes = document.getElementById('notes');
+            const serialNo = document.getElementById('serialNo');
+            const bookCode = document.getElementById('bookCode');
+
+            const rawText = document.getElementById('rawText');
+            const parseBtn = document.getElementById('parseBtn');
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const genCaptionBtn = document.getElementById('genCaptionBtn');
+            const copyCaptionBtn = document.getElementById('copyCaptionBtn');
+            const captionOutput = document.getElementById('captionOutput');
+            const statusDiv = document.getElementById('status');
+
+            const canvas = document.getElementById('posterCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let coverImageData = null;
+
+            // ===== HELPERS =====
+            function wrapText(ctx, text, maxWidth) {
+                if (!text) return [];
+                const words = text.split(' ');
+                let lines = [];
+                let currentLine = '';
+                for (let i = 0; i < words.length; i++) {
+                    const word = words[i];
+                    const testLine = currentLine ? currentLine + ' ' + word : word;
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && currentLine !== '') {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine) lines.push(currentLine);
+                return lines;
+            }
+
+            // ===== COVER UPLOAD =====
+            coverUpload.addEventListener('change', function(e) {
+                const file = this.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const img = new Image();
+                    img.onload = function() {
+                        coverImageData = img;
+                        coverPreviewArea.style.display = 'flex';
+                        coverPreviewImg.src = ev.target.result;
+                        coverFileName.textContent = file.name;
+                        statusDiv.innerText = '✅ Cover photo loaded: ' + file.name;
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // ===== PARSE TEXT =====
+            parseBtn.addEventListener('click', function() {
+                const text = rawText.value;
+                if (!text.trim()) {
+                    alert('Please paste some text first.');
+                    return;
+                }
+                const rules = [
+                    { pattern: /(?:Title|Book|Name)\s*[:]\s*(.+)/i, field: bookName },
+                    { pattern: /(?:Author|By)\s*[:]\s*(.+)/i, field: author },
+                    { pattern: /(?:Publisher|Published by)\s*[:]\s*(.+)/i, field: publisher },
+                    { pattern: /(?:Publication Date|Year)\s*[:]\s*(.+)/i, field: year },
+                    { pattern: /Edition\s*[:]\s*(.+)/i, field: edition },
+                    { pattern: /Binding\s*[:]\s*(.+)/i, field: binding },
+                    { pattern: /Condition\s*[:]\s*(.+)/i, field: condition },
+                    { pattern: /(?:Printed in|Country)\s*[:]\s*(.+)/i, field: printedIn },
+                    { pattern: /Notes\s*[:]\s*(.+)/i, field: notes },
+                ];
+                let found = 0;
+                for (let r of rules) {
+                    const match = text.match(r.pattern);
+                    if (match && match[1] && match[1].trim()) {
+                        if (r.field === condition) {
+                            const val = match[1].trim();
+                            const options = condition.options;
+                            let exists = false;
+                            for (let opt of options) {
+                                if (opt.value.toLowerCase() === val.toLowerCase()) {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (exists) {
+                                condition.value = val;
+                            } else {
+                                condition.value = '';
+                                statusDiv.innerText = '⚠️ Condition "'+val+'" not in dropdown. Please select manually.';
+                            }
+                        } else {
+                            r.field.value = match[1].trim();
+                        }
+                        found++;
+                    }
+                }
+                if (found === 0) {
+                    statusDiv.innerText = '⚠️ No supported keywords found. Use "Title:", "Author:", etc.';
+                } else {
+                    statusDiv.innerText = '✅ Parsed ' + found + ' fields. Review and repair if needed.';
+                }
+            });
+
+            // ===== GENERATE POSTER (NEW LAYOUT) =====
+            generateBtn.addEventListener('click', function() {
+                if (!coverImageData) {
+                    alert('Please upload a cover photo first.');
+                    return;
+                }
+
+                const w = 800, h = 800;
+                canvas.width = w; canvas.height = h;
+
+                // ---- BACKGROUND ----
+                const grad = ctx.createLinearGradient(0,0,w,h);
+                grad.addColorStop(0, '#f7f1e8');
+                grad.addColorStop(1, '#e8ddcf');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0,0,w,h);
+
+                // ---- BORDER ----
+                ctx.strokeStyle = '#4a3422';
+                ctx.lineWidth = 10;
+                ctx.strokeRect(10,10,w-20,h-20);
+                ctx.strokeStyle = '#b08862';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(18,18,w-36,h-36);
+
+                // ---- HEADER (without logo) ----
+                ctx.font = 'bold 28px "Times New Roman", serif';
+                ctx.fillStyle = '#3e2c1b';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText('Findrarebooks', 400, 20);
+
+                // ---- LAYOUT: LEFT = COVER PHOTO (with black background) ----
+                const coverLeft = 25;
+                const coverWidth = 340;
+                const coverTop = 70;
+                const coverBottom = 90;
+                const coverHeight = h - coverTop - coverBottom;
+
+                // Black background for cover area
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(coverLeft-5, coverTop-5, coverWidth+10, coverHeight+10);
+                ctx.fillStyle = '#2a2a2a';
+                ctx.fillRect(coverLeft, coverTop, coverWidth, coverHeight);
+
+                // Place cover photo centered inside
+                const imgAspect = coverImageData.width / coverImageData.height;
+                let drawW = coverWidth - 20, drawH = (coverWidth - 20) / imgAspect;
+                if (drawH > coverHeight - 20) { drawH = coverHeight - 20; drawW = drawH * imgAspect; }
+                const imgX = coverLeft + (coverWidth - drawW)/2;
+                const imgY = coverTop + (coverHeight - drawH)/2;
+
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetX = 4;
+                ctx.shadowOffsetY = 4;
+                ctx.drawImage(coverImageData, imgX, imgY, drawW, drawH);
+                ctx.restore();
+
+                // ---- RIGHT: BOOK INFO (structured) ----
+                const infoX = 395;
+                const infoMaxWidth = 370;
+                let yPos = 75;
+
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+
+                // Helper to draw label: value with dynamic font sizing
+                function drawField(label, value, y, fontSize) {
+                    if (!value && value !== '') return y;
+                    const labelFont = fontSize || 18;
+                    const valFont = Math.min(labelFont, 20);
+                    ctx.font = 'bold ' + labelFont + 'px "Times New Roman", serif';
+                    ctx.fillStyle = '#3e2c1b';
+                    const labelText = label + ':';
+                    ctx.fillText(labelText, infoX, y);
+                    const labelWidth = ctx.measureText(labelText).width;
+                    ctx.font = valFont + 'px "Times New Roman", serif';
+                    ctx.fillStyle = '#2c1a0c';
+                    // Wrap value if needed
+                    const maxValWidth = infoMaxWidth - labelWidth - 10;
+                    if (maxValWidth < 50) { // fallback if label too long
+                        // draw on next line
+                        ctx.fillText(value, infoX, y + labelFont + 4);
+                        return y + labelFont + 4 + valFont + 6;
+                    }
+                    const lines = wrapText(ctx, value, maxValWidth);
+                    for (let i = 0; i < lines.length; i++) {
+                        if (i === 0) {
+                            ctx.fillText(lines[i], infoX + labelWidth + 8, y);
+                        } else {
+                            ctx.fillText(lines[i], infoX + labelWidth + 8, y + (i * (valFont + 4)));
+                        }
+                    }
+                    return y + (lines.length * (valFont + 4)) + 8;
+                }
+
+                // Dynamic font sizing: reduce size if text is long
+                function getFontSize(text, baseSize) {
+                    if (!text) return baseSize;
+                    if (text.length > 40) return Math.max(baseSize - 4, 12);
+                    if (text.length > 20) return Math.max(baseSize - 2, 14);
+                    return baseSize;
+                }
+
+                // Book Name (larger)
+                const nameVal = bookName.value || 'Book Name';
+                let fs = getFontSize(nameVal, 26);
+                ctx.font = 'bold ' + fs + 'px "Times New Roman", serif';
+                ctx.fillStyle = '#2c1a0c';
+                const nameLines = wrapText(ctx, nameVal, infoMaxWidth);
+                for (let line of nameLines) {
+                    ctx.fillText(line, infoX, yPos);
+                    yPos += fs + 6;
+                }
+                yPos += 6;
+
+                // Author
+                const authVal = author.value || 'Author';
+                fs = getFontSize(authVal, 20);
+                yPos = drawField('Author', authVal, yPos, fs);
+
+                // Publisher
+                const pubVal = publisher.value || '';
+                if (pubVal) {
+                    fs = getFontSize(pubVal, 18);
+                    yPos = drawField('Publisher', pubVal, yPos, fs);
+                }
+
+                // Year
+                const yrVal = year.value || '';
+                if (yrVal) {
+                    fs = getFontSize(yrVal, 18);
+                    yPos = drawField('Publication Date', yrVal, yPos, fs);
+                }
+
+                // Binding
+                const bindVal = binding.value || '';
+                if (bindVal) {
+                    fs = getFontSize(bindVal, 18);
+                    yPos = drawField('Binding', bindVal, yPos, fs);
+                }
+
+                // Condition
+                const condVal = condition.value || '';
+                if (condVal) {
+                    fs = getFontSize(condVal, 18);
+                    yPos = drawField('Condition', condVal, yPos, fs);
+                }
+
+                // Edition
+                const edVal = edition.value || '';
+                if (edVal) {
+                    fs = getFontSize(edVal, 18);
+                    yPos = drawField('Edition', edVal, yPos, fs);
+                }
+
+                // Printed in
+                const printedVal = printedIn.value || '';
+                if (printedVal) {
+                    fs = getFontSize(printedVal, 18);
+                    yPos = drawField('Printed in', printedVal, yPos, fs);
+                }
+
+                // Notes (wrap, smaller)
+                const notesVal = notes.value || '';
+                if (notesVal) {
+                    fs = getFontSize(notesVal, 16);
+                    yPos = drawField('Notes', notesVal, yPos, fs);
+                }
+
+                // ---- BOTTOM: Serial Number and Book Code ----
+                const bottomY = h - 65;
+                const boxW = 180, boxH = 34;
+                const gap = 40;
+
+                // Serial Number (left)
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 14px monospace';
+                ctx.fillStyle = '#2c1a0c';
+                ctx.fillText('SERIAL NO.', 140, bottomY-8);
+                const bx1 = 50, by1 = bottomY;
+                ctx.strokeStyle = '#3e2c1b';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(bx1, by1, boxW, boxH);
+                ctx.fillStyle = '#fef8f0';
+                ctx.fillRect(bx1+2, by1+2, boxW-4, boxH-4);
+                ctx.font = 'bold 16px monospace';
+                ctx.fillStyle = '#1f1208';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(serialNo.value || 'FRB-000', bx1 + boxW/2, by1 + boxH/2);
+
+                // Book Code (right)
+                ctx.font = 'bold 14px monospace';
+                ctx.fillStyle = '#2c1a0c';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('BOOK CODE', 140 + boxW + gap + boxW/2, bottomY-8);
+                const bx2 = 50 + boxW + gap;
+                ctx.strokeStyle = '#3e2c1b';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(bx2, by1, boxW, boxH);
+                ctx.fillStyle = '#fef8f0';
+                ctx.fillRect(bx2+2, by1+2, boxW-4, boxH-4);
+                ctx.font = 'bold 16px monospace';
+                ctx.fillStyle = '#1f1208';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(bookCode.value || 'BC-000', bx2 + boxW/2, by1 + boxH/2);
+
+                // Hashtag (bottom-right)
+                ctx.font = 'bold 16px "Times New Roman", serif';
+                ctx.fillStyle = '#7a5f44';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('#FindRareBooks', w-20, bottomY+18);
+
+                // Footer
+                ctx.font = '11px "Times New Roman", serif';
+                ctx.fillStyle = '#a08060';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('© Find Rare Books • UK Vintage Collection', 400, h-8);
+
+                statusDiv.innerText = '✅ Poster generated with new layout (logo removed, black cover background, Book Code added). Click Download to save.';
+            });
+
+            // ===== DOWNLOAD =====
+            downloadBtn.addEventListener('click', function() {
+                const dataUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = 'poster-' + (serialNo.value || 'FRB') + '.png';
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                statusDiv.innerText = '✅ Poster downloaded!';
+            });
+
+            // ===== CAPTION =====
+            genCaptionBtn.addEventListener('click', function() {
+                const name = bookName.value || 'Rare Book';
+                const auth = author.value || 'Unknown Author';
+                const pub = publisher.value || 'Unknown Publisher';
+                const yr = year.value || 'Unknown Year';
+                const ed = edition.value ? ' ('+edition.value+')' : '';
+                const bind = binding.value ? 'Binding: '+binding.value+'. ' : '';
+                const cond = condition.value ? 'Condition: '+condition.value+'. ' : '';
+                const notesTxt = notes.value ? 'Notes: '+notes.value+'. ' : '';
+                const title = '📖 Book of the Day: ' + name;
+                const desc = '🌟 We\'re delighted to present "'+name+'" by '+auth+'. ' +
+                    'Published in '+yr+' by '+pub+ed+'. ' +
+                    bind+cond+notesTxt+
+                    'A true gem for collectors. Don\'t miss out! 📚✨\n\n' +
+                    '🔗 Visit our page for more rare finds.';
+                const hashtags = '#FindRareBooks #RareBooks #BookCollector #VintageBooks #AntiqueBooks #Bookstagram #InstaBooks #'+
+                    name.replace(/\s/g,'')+' #'+auth.replace(/\s/g,'');
+                captionOutput.value = title+'\n\n'+desc+'\n\n'+hashtags;
+            });
+
+            copyCaptionBtn.addEventListener('click', function() {
+                const text = captionOutput.value;
+                if (!text || text.trim() === 'Fill in the details...') {
+                    alert('Please generate a caption first.');
+                    return;
+                }
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => alert('✅ Copied!')).catch(() => {
+                        captionOutput.select(); document.execCommand('copy'); alert('✅ Copied!');
+                    });
+                } else {
+                    captionOutput.select(); document.execCommand('copy'); alert('✅ Copied!');
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>
