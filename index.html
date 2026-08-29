@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Poster & Caption Generator – Find Rare Books</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700&family=Cinzel:wght@700&display=swap" rel="stylesheet" />
+
+    <!-- html2canvas for download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+    </script>
+
+    <style>
+        /* ---------- Reset & Variables ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5efe6;
+            --card-bg: #fffcf5;
+            --border: #d6c4b0;
+            --accent: #6b4f2e;
+            --accent-light: #a67c52;
+            --text-dark: #2c1a0c;
+            --text-muted: #5a402a;
+            --shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            --radius: 20px;
+            --font-serif: 'Playfair Display', 'Times New Roman', serif;
+            --font-sans: 'Inter', 'Segoe UI', sans-serif;
+            --font-cinzel: 'Cinzel', serif;
+        }
+
+        body {
+            background: #3e2c1b;
+            font-family: var(--font-sans);
+            padding: 30px 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app {
+            max-width: 1200px;
+            width: 100%;
+            background: var(--bg);
+            padding: 30px 25px;
+            border-radius: var(--radius);
+            border: 2px solid var(--accent-light);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            text-align: center;
+            font-family: var(--font-serif);
+            color: var(--text-dark);
+            border-bottom: 3px double var(--accent-light);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h1 small {
+            display: block;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* ---------- UI Sections ---------- */
+        .section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        .col {
+            flex: 1 1 200px;
+        }
+        .col-full {
+            flex: 1 1 100%;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fefcf9;
+            font-size: 14px;
+            font-family: var(--font-sans);
+            transition: 0.2s;
+        }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(107, 79, 46, 0.2);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* ---------- Buttons ---------- */
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            background: #4e3823;
+            transform: scale(0.97);
+        }
+        .btn-secondary {
+            background: var(--accent-light);
+        }
+        .btn-secondary:hover {
+            background: #8b653f;
+        }
+        .btn-green {
+            background: #3d7a4a;
+        }
+        .btn-green:hover {
+            background: #2e5f39;
+        }
+        .btn-center {
+            text-align: center;
+            margin: 10px 0;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* ---------- Cover Preview (small) ---------- */
+        .cover-preview {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            background: #ede4d6;
+            padding: 12px 18px;
+            border-radius: 40px;
+        }
+        .cover-preview img {
+            width: 80px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid var(--accent);
+            background: #fff;
+        }
+
+        /* ---------- Poster Preview (live) ---------- */
+        .poster-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background: #d6c4b0;
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 2px dashed var(--accent);
+        }
+
+        #posterPreview {
+            width: 100%;
+            max-width: 600px;
+            /* will be square via aspect-ratio */
+            aspect-ratio: 1 / 1;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+            font-family: var(--font-serif);
+        }
+
+        /* ---- Internal Poster Layout (flex) ---- */
+        .poster-inner {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background: #f7f1e8;
+        }
+
+        /* Left: Cover (65%) */
+        .poster-cover {
+            flex: 0 0 65%;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2%;
+            position: relative;
+        }
+        .poster-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* keeps aspect ratio inside the black box */
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+        }
+        .poster-cover .book-code-bottom {
+            position: absolute;
+            bottom: 4%;
+            left: 4%;
+            color: #ccc;
+            font-family: var(--font-sans);
+            font-size: clamp(0.6rem, 1.2vw, 0.9rem);
+            letter-spacing: 0.05em;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 10px;
+            border-radius: 20px;
+            border: 1px solid #555;
+        }
+
+        /* Right: Info (35%) */
+        .poster-info {
+            flex: 1;
+            background: #fcf8f2;
+            padding: 4% 4% 3% 4%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* prevent overflow */
+            position: relative;
+            border-left: 1px solid #d6c4b0;
+        }
+
+        .poster-info .info-header {
+            border-bottom: 2px solid var(--accent-light);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+        .poster-info .info-header .title {
+            font-family: var(--font-cinzel);
+            font-weight: 700;
+            font-size: clamp(1.2rem, 2.5vw, 2.2rem);
+            line-height: 1.1;
+            text-transform: uppercase;
+            color: var(--text-dark);
+            letter-spacing: 0.03em;
+        }
+        .poster-info .info-header .author {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: clamp(0.8rem, 1.4vw, 1.2rem);
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Metadata table */
+        .info-table {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: clamp(0.6rem, 1vw, 0.85rem);
+            line-height: 1.4;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .info-row {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            padding: 2px 0;
+        }
+        .info-row .label {
+            font-weight: 600;
+            color: var(--text-muted);
+            flex: 0 0 38%;
+            text-transform: uppercase;
+            font-size: 0.75em;
+            letter-spacing: 0.03em;
+        }
+        .info-row .value {
+            flex: 1;
+            color: var(--text-dark);
+            padding-left: 6px;
+            word-break: break-word;
+        }
+
+        /* Footer inside poster-info */
+        .poster-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 6px;
+            border-top: 1px solid #ddd;
+            font-size: clamp(0.5rem, 0.8vw, 0.7rem);
+            font-family: var(--font-sans);
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+        .poster-footer .hashtag {
+            font-weight: 700;
+            color: var(--accent);
+            font-family: var(--font-serif);
+            font-size: clamp(0.7rem, 1vw, 1rem);
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 600px) {
+            .app {
+                padding: 15px;
+            }
+            .poster-inner {
+                flex-direction: column;
+            }
+            .poster-cover {
+                flex: 0 0 55%;
+            }
+            .poster-info {
+                flex: 1;
+                border-left: none;
+                border-top: 1px solid #d6c4b0;
+            }
+            .poster-info .info-header .title {
+                font-size: clamp(1rem, 4vw, 1.8rem);
+            }
+            .info-row .label {
+                flex: 0 0 40%;
+            }
+        }
+
+        /* ---------- Caption box ---------- */
+        .caption-box {
+            background: #2c1e12;
+            color: #f0e3d5;
+            padding: 18px;
+            border-radius: 15px;
+            margin-top: 12px;
+            white-space: pre-wrap;
+        }
+        .caption-box textarea {
+            background: #3d2d1d;
+            color: #f5ede4;
+            border: 1px solid #8b6f52;
+            min-height: 150px;
+            font-size: 14px;
+            line-height: 1.6;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: var(--font-sans);
+        }
+        .caption-box textarea:focus {
+            border-color: var(--accent-light);
+        }
+
+        /* ---------- Status ---------- */
+        #status {
+            background: #e2d5c6;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: var(--text-dark);
+            min-height: 44px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+
+        /* ---------- Utility ---------- */
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .text-muted {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .tag {
+            background: #ede4d6;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h1>📖 Poster & Caption Generator <small>Find Rare Books • UK Vintage</small></h1>
+
+        <!-- ========== INPUT CONTROLS ========== -->
+        <div class="section">
+            <div class="section-title">📸 1. Upload Cover Photo</div>
+            <input type="file" id="coverUpload" accept="image/*" />
+            <div class="cover-preview" id="coverPreviewArea" style="display:none;">
+                <span>📷 Cover:</span>
+                <img id="coverPreviewImg" alt="preview" />
+                <span id="coverFileName" style="color:var(--text-muted);"></span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📝 2. Paste Raw Text & Parse</div>
+            <div class="parse-area" style="background:#f1e8db; padding:15px; border-radius:15px;">
+                <label for="rawText">Paste book info (key‑value or plain text):</label>
+                <textarea id="rawText" placeholder="Title: The Hobbit&#10;Author: J.R.R. Tolkien&#10;Publisher: HarperCollins&#10;Publication Date: 2012&#10;Binding: Hardcover&#10;Condition: Very Good&#10;Edition: 75th Anniversary Edition&#10;Printed in: United Kingdom&#10;Notes: Beautiful edition with illustrations.&#10;Book Code: B-102"></textarea>
+                <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+                    <button class="btn btn-secondary" id="parseBtn">🔍 Parse Text</button>
+                </div>
+                <div class="text-muted mt-8">
+                    <strong>Supported labels:</strong> Title, Author, Publisher, Publication Date, Year, Edition, Binding, Condition, Printed in, Country, Notes, Book Code.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">✏️ 3. Check & Repair Fields</div>
+            <div class="row">
+                <div class="col"><label>📘 Book Name</label><input id="bookName" placeholder="e.g. The Hobbit" /></div>
+                <div class="col"><label>✍️ Author</label><input id="author" placeholder="e.g. J.R.R. Tolkien" /></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>🏛️ Publisher</label><input id="publisher" placeholder="e.g. HarperCollins" /></div>
+                <div class="col"><label>📅 Publication Year</label><input id="year" placeholder="e.g. 2012" /></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>📑 Edition</label><input id="edition" placeholder="e.g. 75th Anniversary Edition" /></div>
+                <div class="col"><label>📘 Binding</label><input id="binding" placeholder="e.g. Hardcover" /></div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label>📌 Condition</label>
+                    <select id="condition">
+                        <option value="">-- Select --</option>
+                        <option value="As New / Mint">As New / Mint</option>
+                        <option value="Fine">Fine</option>
+                        <option value="Near Fine">Near Fine</option>
+                        <option value="Very Good+">Very Good+</option>
+                        <option value="Very Good">Very Good</option>
+                        <option value="Good+">Good+</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Poor">Poor</option>
+                        <option value="Ex-Library">Ex-Library</option>
+                        <option value="Reading Copy">Reading Copy</option>
+                        <option value="Binding Copy">Binding Copy</option>
+                    </select>
+                </div>
+                <div class="col"><label>🌍 Printed in</label><input id="printedIn" placeholder="e.g. United Kingdom" /></div>
+            </div>
+            <div class="row">
+                <div class="col-full"><label>📝 Notes</label><input id="notes" placeholder="e.g. Beautiful edition with illustrations." /></div>
+            </div>
+            <div class="row">
+                <div class="col"><label>🔢 Serial Number</label><input id="serialNo" placeholder="e.g. FRB-001" /></div>
+                <div class="col"><label>📚 Book Code</label><input id="bookCode" placeholder="e.g. B-102" /></div>
+            </div>
+        </div>
+
+        <!-- ========== GENERATE & DOWNLOAD ========== -->
+        <div class="btn-center">
+            <div class="btn-group">
+                <button class="btn" id="generateBtn">🖼️ Update Poster</button>
+                <button class="btn btn-green" id="downloadBtn">⬇️ Download High‑Res PNG</button>
+            </div>
+        </div>
+        <div id="status">⏳ Upload a cover, fill details, then click 'Update Poster'.</div>
+
+        <!-- ========== LIVE POSTER PREVIEW ========== -->
+        <div class="poster-wrap">
+            <div id="posterPreview">
+                <!-- The poster will be rendered here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- ========== CAPTION GENERATOR ========== -->
+        <div class="section">
+            <div class="section-title">📱 4. Instagram Caption</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                <button class="btn btn-secondary" id="genCaptionBtn">✨ Generate Caption</button>
+                <button class="btn btn-green" id="copyCaptionBtn">📋 Copy Caption</button>
+            </div>
+            <div class="caption-box">
+                <textarea id="captionOutput" readonly>Click 'Generate Caption' to create your post.</textarea>
+            </div>
+        </div>
+
+        <footer style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:10px;">
+            @FindRareBooks • Instagram / Facebook
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            const coverUpload = document.getElementById('coverUpload');
+            const coverPreviewArea = document.getElementById('coverPreviewArea');
+            const coverPreviewImg = document.getElementById('coverPreviewImg');
+            const coverFileName = document.getElementById('coverFileName');
+
+            const bookName = document.getElementById('bookName');
+            const author = document.getElementById('author');
+            const publisher = document.getElementById('publisher');
+            const year = document.getElementById('year');
+            const edition = document.getElementById('edition');
+            const binding = document.getElementById('binding');
+            const condition = document.getElementById('condition');
+            const printedIn = document.getElementById('printedIn');
+            const notes = document.getElementById('notes');
+            const serialNo = document.getElementById('serialNo');
+            const bookCode = document.getElementById('bookCode');
+
+            const rawText = document.getElementById('rawText');
+            const parseBtn = document.getElementById('parseBtn');
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const genCaptionBtn = document.getElementById('genCaptionBtn');
+            const copyCaptionBtn = document.getElementById('copyCaptionBtn');
+            const captionOutput = document.getElementById('captionOutput');
+            const statusDiv = document.getElementById('status');
+            const posterPreview = document.getElementById('posterPreview');
+
+            // ============================================================
+            // STATE
+            // ============================================================
+            let coverImageData = null; // will hold an Image object
+
+            // ============================================================
+            // HELPERS
+            // ============================================================
+            function getValueOrDefault(input, defaultText) {
+                return input.value.trim() || defaultText;
+            }
+
+            // Smart wrap: if text is long, reduce font size (used in table)
+            // But we handle via CSS clamp and flex, so not needed.
+
+            // ============================================================
+            // COVER UPLOAD
+            // ============================================================
+            coverUpload.addEventListener('change', function(e) {
+                const file = this.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const img = new Image();
+                    img.onload = function() {
+                        coverImageData = img;
+                        coverPreviewArea.style.display = 'flex';
+                        coverPreviewImg.src = ev.target.result;
+                        coverFileName.textContent = file.name;
+                        statusDiv.innerText = '✅ Cover photo loaded: ' + file.name;
+                        // auto-update poster
+                        renderPoster();
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // ============================================================
+            // PARSE TEXT
+            // ============================================================
+            parseBtn.addEventListener('click', function() {
+                const text = rawText.value;
+                if (!text.trim()) {
+                    alert('Please paste some text first.');
+                    return;
+                }
+                // Define patterns and target fields
+                const rules = [
+                    { pattern: /(?:Title|Book|Name)\s*[:]\s*(.+)/i, field: bookName },
+                    { pattern: /(?:Author|By)\s*[:]\s*(.+)/i, field: author },
+                    { pattern: /(?:Publisher|Published by)\s*[:]\s*(.+)/i, field: publisher },
+                    { pattern: /(?:Publication Date|Year)\s*[:]\s*(.+)/i, field: year },
+                    { pattern: /Edition\s*[:]\s*(.+)/i, field: edition },
+                    { pattern: /Binding\s*[:]\s*(.+)/i, field: binding },
+                    { pattern: /Condition\s*[:]\s*(.+)/i, field: condition },
+                    { pattern: /(?:Printed in|Country)\s*[:]\s*(.+)/i, field: printedIn },
+                    { pattern: /Notes\s*[:]\s*(.+)/i, field: notes },
+                    { pattern: /(?:Book Code|Code)\s*[:]\s*(.+)/i, field: bookCode },
+                ];
+                let found = 0;
+                for (let r of rules) {
+                    const match = text.match(r.pattern);
+                    if (match && match[1] && match[1].trim()) {
+                        // For condition dropdown, we try to match value
+                        if (r.field === condition) {
+                            const val = match[1].trim();
+                            const options = condition.options;
+                            let exists = false;
+                            for (let opt of options) {
+                                if (opt.value.toLowerCase() === val.toLowerCase()) {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (exists) {
+                                condition.value = val;
+                            } else {
+                                // not in list, leave as empty, user can select manually
+                                condition.value = '';
+                                statusDiv.innerText = '⚠️ Condition "' + val + '" not in dropdown. Please select manually.';
+                            }
+                        } else {
+                            r.field.value = match[1].trim();
+                        }
+                        found++;
+                    }
+                }
+                if (found === 0) {
+                    statusDiv.innerText = '⚠️ No supported keywords found. Use labels like "Title:", "Author:", etc.';
+                } else {
+                    statusDiv.innerText = '✅ Parsed ' + found + ' fields. Review and repair if needed.';
+                }
+                // Update poster after parse
+                renderPoster();
+            });
+
+            // ============================================================
+            // RENDER POSTER (live preview)
+            // ============================================================
+            function renderPoster() {
+                const title = getValueOrDefault(bookName, 'Book Name');
+                const auth = getValueOrDefault(author, 'Author');
+                const pub = getValueOrDefault(publisher, '');
+                const yr = getValueOrDefault(year, '');
+                const ed = getValueOrDefault(edition, '');
+                const bind = getValueOrDefault(binding, '');
+                const cond = condition.value;
+                const printed = getValueOrDefault(printedIn, '');
+                const notesVal = getValueOrDefault(notes, '');
+                const serial = getValueOrDefault(serialNo, 'FRB-000');
+                const code = getValueOrDefault(bookCode, '');
+
+                // Build HTML for poster
+                let coverHtml = '';
+                if (coverImageData) {
+                    // We'll create an img element
+                    coverHtml = `<img src="${coverImageData.src}" alt="Cover" />`;
+                } else {
+                    coverHtml = `<div style="color:#888; font-size:1rem; text-align:center; padding:20px;">📸 Cover<br/>Upload photo</div>`;
+                }
+
+                // Build info rows
+                const rows = [
+                    { label: 'Title', value: title },
+                    { label: 'Author', value: auth },
+                    { label: 'Publisher', value: pub },
+                    { label: 'Publication Date', value: yr },
+                    { label: 'Binding', value: bind },
+                    { label: 'Condition', value: cond },
+                    { label: 'Edition', value: ed },
+                    { label: 'Printed in', value: printed },
+                    { label: 'Notes', value: notesVal },
+                ];
+                let tableRows = '';
+                for (let row of rows) {
+                    if (row.value) {
+                        tableRows += `
+                        <div class="info-row">
+                            <div class="label">${row.label}</div>
+                            <div class="value">${row.value}</div>
+                        </div>`;
+                    }
+                }
+
+                // Full poster HTML
+                const posterHtml = `
+                <div class="poster-inner">
+                    <!-- Left: Cover -->
+                    <div class="poster-cover">
+                        ${coverHtml}
+                        ${code ? `<div class="book-code-bottom">📚 Book Code: ${code}</div>` : ''}
+                    </div>
+                    <!-- Right: Info -->
+                    <div class="poster-info">
+                        <div class="info-header">
+                            <div class="title">${title}</div>
+                            <div class="author">${auth}</div>
+                        </div>
+                        <div class="info-table">
+                            ${tableRows}
+                        </div>
+                        <div class="poster-footer">
+                            <span>${serial}</span>
+                            <span class="hashtag">#findrarebooks</span>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                posterPreview.innerHTML = posterHtml;
+                statusDiv.innerText = '✅ Poster preview updated. Click "Download High‑Res PNG" to save.';
+            }
+
+            // ============================================================
+            // GENERATE POSTER (trigger render)
+            // ============================================================
+            generateBtn.addEventListener('click', function() {
+                if (!coverImageData) {
+                    alert('Please upload a cover photo first.');
+                    return;
+                }
+                renderPoster();
+            });
+
+            // Auto-render on input changes (optional)
+            // We'll attach a simple debounce to all inputs
+            const inputs = [bookName, author, publisher, year, edition, binding, condition, printedIn, notes, serialNo,
+                bookCode
+            ];
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    // if cover is loaded, update
+                    if (coverImageData) {
+                        renderPoster();
+                    }
+                });
+            });
+
+            // Also for condition select change
+            condition.addEventListener('change', function() {
+                if (coverImageData) renderPoster();
+            });
+
+            // ============================================================
+            // DOWNLOAD HIGH-RES PNG (using html2canvas)
+            // ============================================================
+            downloadBtn.addEventListener('click', function() {
+                if (!coverImageData) {
+                    alert('Please upload a cover photo first.');
+                    return;
+                }
+                // Ensure poster is rendered
+                renderPoster();
+
+                const previewEl = document.getElementById('posterPreview');
+                // Scale factor for high-res (e.g., 2x)
+                const scale = 2; // 1200x1200 from 600x600 if scaled
+                // But we want to capture at higher resolution.
+                // We'll use html2canvas with scale.
+                html2canvas(previewEl, {
+                    scale: scale,
+                    useCORS: true,
+                    backgroundColor: '#f7f1e8',
+                    allowTaint: false,
+                    logging: false,
+                }).then(function(canvas) {
+                    const link = document.createElement('a');
+                    const title = bookName.value.trim() || 'Book';
+                    const code = bookCode.value.trim() || 'BC';
+                    link.download = `${title.replace(/\s+/g,'_')}_${code}_Poster.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    statusDiv.innerText = '✅ High-res poster downloaded!';
+                }).catch(function(err) {
+                    console.error(err);
+                    statusDiv.innerText = '❌ Download failed: ' + err.message;
+                });
+            });
+
+            // ============================================================
+            // CAPTION GENERATOR
+            // ============================================================
+            genCaptionBtn.addEventListener('click', function() {
+                const name = bookName.value.trim() || 'Rare Book';
+                const auth = author.value.trim() || 'Unknown Author';
+                const pub = publisher.value.trim() || 'Unknown Publisher';
+                const yr = year.value.trim() || 'Unknown Year';
+                const ed = edition.value.trim() ? ' (' + edition.value.trim() + ')' : '';
+                const bind = binding.value.trim() ? 'Binding: ' + binding.value.trim() + '. ' : '';
+                const cond = condition.value ? 'Condition: ' + condition.value + '. ' : '';
+                const notesVal = notes.value.trim() ? 'Notes: ' + notes.value.trim() + '. ' : '';
+                const code = bookCode.value.trim() ? 'Book Code: ' + bookCode.value.trim() + '. ' : '';
+
+                const title = '📖 Book of the Day: ' + name;
+                const desc = '🌟 We\'re delighted to present "' + name + '" by ' + auth + '. ' +
+                    'Published in ' + yr + ' by ' + pub + ed + '. ' +
+                    bind + cond + notesVal + code +
+                    'A true gem for collectors. Don\'t miss out! 📚✨\n\n' +
+                    '🔗 Visit our page for more rare finds.';
+                const hashtags = '#FindRareBooks #RareBooks #BookCollector #VintageBooks #AntiqueBooks #Bookstagram #InstaBooks #' +
+                    name.replace(/\s/g, '') + ' #' + auth.replace(/\s/g, '');
+                captionOutput.value = title + '\n\n' + desc + '\n\n' + hashtags;
+            });
+
+            // ============================================================
+            // COPY CAPTION
+            // ============================================================
+            copyCaptionBtn.addEventListener('click', function() {
+                const text = captionOutput.value;
+                if (!text || text.trim() === 'Click \'Generate Caption\' to create your post.') {
+                    alert('Please generate a caption first.');
+                    return;
+                }
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('✅ Caption copied! Paste it on Instagram/Facebook.');
+                    }).catch(() => {
+                        // fallback
+                        captionOutput.select();
+                        document.execCommand('copy');
+                        alert('✅ Copied!');
+                    });
+                } else {
+                    captionOutput.select();
+                    document.execCommand('copy');
+                    alert('✅ Copied!');
+                }
+            });
+
+            // ============================================================
+            // INIT: Render placeholder poster (optional)
+            // ============================================================
+            // Render initial poster with placeholder cover
+            // We'll simulate a dummy cover? Better to wait for upload.
+            // Just show a message.
+            posterPreview.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:center; height:100%; background:#f5efe6; color:#888; font-size:1.2rem; text-align:center; padding:20px;">
+                    <div>📸 Upload a cover photo<br/>and fill in details.<br/>Then click "Update Poster".</div>
+                </div>
+            `;
+
+            // Allow render even without cover? We'll handle in generate.
+            // But we can also render with placeholder if needed.
+            // We'll tie it to generate button.
+
+            console.log('✅ Poster & Caption Generator ready.');
+        })();
+    </script>
+</body>
+</html>
