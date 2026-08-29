@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rare Books Poster & Instagram Catalog Generator</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f1115;
+      --panel-bg: #181b22;
+      --accent: #d4af37;
+      --accent-hover: #b8972e;
+      --border: #2a2f3d;
+      --text: #ffffff;
+      --text-dim: #9aa3b2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text);
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    .main-wrapper {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .main-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Controls */
+    .controls {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .controls h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-group input[type="text"],
+    .input-group textarea {
+      background: #0f1115;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .input-group textarea {
+      min-height: 160px;
+      resize: vertical;
+      line-height: 1.4;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .upload-btn {
+      background: #0f1115;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    .upload-btn:hover {
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-action {
+      background: #232834;
+      color: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-action:hover {
+      background: #313747;
+    }
+
+    /* Output Display Area */
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .canvas-holder {
+      background: #000;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+    }
+
+    /* -------------------------------------------------------------
+       THE EXACT POSTER TEMPLATE (Square 800px X 800px Canvas)
+    -------------------------------------------------------------- */
+    #poster-node {
+      width: 800px;
+      height: 800px;
+      background: #000000;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: relative;
+      user-select: none;
+    }
+
+    .poster-main {
+      display: flex;
+      width: 100%;
+      height: 736px; /* 800px - 64px footer */
+      background: #000000;
+    }
+
+    /* Left: Book Cover (Black Box Fixed 65%) */
+    .poster-left-box {
+      width: 65%;
+      height: 100%;
+      background: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .poster-left-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+    }
+
+    /* Right: Vintage Book Details (35%) */
+    .poster-right-box {
+      width: 35%;
+      height: 100%;
+      background: #ffffff;
+      color: #1a1a1a;
+      padding: 26px 20px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Playfair Display', serif;
+      box-sizing: border-box;
+      border-left: 1px solid #eaeaea;
+    }
+
+    .poster-header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .poster-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      color: #111111;
+    }
+
+    .poster-author {
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #333333;
+      margin-top: 6px;
+    }
+
+    .poster-divider {
+      width: 100%;
+      height: 1px;
+      background: #bcbcbc;
+      margin: 12px 0;
+    }
+
+    /* Auto-fitted dynamic metadata list */
+    .poster-meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex: 1;
+      justify-content: flex-start;
+      font-size: 0.82rem;
+      line-height: 1.28;
+      overflow: hidden;
+    }
+
+    .meta-item {
+      display: grid;
+      grid-template-columns: 95px 1fr;
+      align-items: baseline;
+      column-gap: 6px;
+    }
+
+    .meta-key {
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .meta-value {
+      font-weight: 400;
+      color: #222222;
+      word-break: break-word;
+    }
+
+    /* Bottom Permanent Bar */
+    .poster-bottom-bar {
+      height: 64px;
+      width: 100%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      box-sizing: border-box;
+      border-top: 1px solid #dcdcdc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .bottom-code {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    .bottom-branding {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    /* Instagram Caption Card */
+    .caption-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .caption-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .caption-body {
+      background: #0f1115;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-wrapper">
+    <!-- Controls -->
+    <div class="controls">
+      <h2>📖 Catalog & Poster Setup</h2>
+
+      <div class="input-group">
+        <label>1. Book Cover Photo</label>
+        <div class="upload-btn" onclick="document.getElementById('imgFile').click()">
+          <span id="file-label">📸 Click to Upload Book Cover</span>
+          <input type="file" id="imgFile" accept="image/*" style="display:none;" onchange="previewImage(event)">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>2. Book Metadata (Paste Raw Text)</label>
+        <textarea id="rawText" placeholder="Paste metadata here..."></textarea>
+      </div>
+
+      <div class="input-group">
+        <label>3. Book Code (Bottom Left)</label>
+        <input type="text" id="bookCode" value="BC-1959-01" placeholder="e.g. BC-1959-01">
+      </div>
+
+      <button class="btn-primary" onclick="generateAll()">⚡ Generate Poster & Caption</button>
+      <button class="btn-action" onclick="downloadPosterImage()">📥 Download Poster (PNG)</button>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-container">
+      <div class="canvas-holder">
+        <div id="poster-node">
+          <div class="poster-main">
+            <!-- Left 65% Black Frame -->
+            <div class="poster-left-box">
+              <img id="renderCover" src="" alt="Book Cover" style="display:none;" />
+            </div>
+
+            <!-- Right 35% Information -->
+            <div class="poster-right-box" id="infoBox">
+              <div class="poster-header">
+                <div class="poster-title" id="outTitle">THE GOSPELS</div>
+                <div class="poster-author" id="outAuthor">JAMES MOFFATT</div>
+              </div>
+              <div class="poster-divider"></div>
+              
+              <div class="poster-meta-list" id="outMetaList">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Fixed Bar -->
+          <div class="poster-bottom-bar">
+            <div class="bottom-code" id="outBottomCode">Book Code: BC-1959-01</div>
+            <div class="bottom-branding">#findrarebooks</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instagram Caption -->
+      <div class="caption-card">
+        <div class="caption-header">
+          <span style="font-weight:700; color:#fff;">✨ Bibliographical Instagram Post</span>
+          <button class="btn-action" onclick="copyCaptionText()">📋 Copy Post</button>
+        </div>
+        <div class="caption-body" id="outCaption">Generating caption...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initial Text Data
+    const defaultData = `Book Name: The Moffatt Translation of the Gospels / The Gospels
+Author: James Moffatt (Translator)
+Publisher: Hodder and Stoughton
+Year: 1959
+Binding: Paperback
+Condition: Very Good
+Edition: First Paperback Edition
+Printed in: England
+Notes: First published in this form 1959; original price 2/6 net; printed and bound by Hazell Watson and Viney Ltd.`;
+
+    document.getElementById('rawText').value = defaultData;
+
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById('renderCover');
+          img.src = e.target.result;
+          img.style.display = 'block';
+          document.getElementById('file-label').innerText = '✅ Loaded: ' + file.name;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function parseInput(text) {
+      const lines = text.split('\n');
+      const map = {};
+      lines.forEach(line => {
+        const idx = line.indexOf(':');
+        if (idx !== -1) {
+          const key = line.substring(0, idx).trim();
+          const val = line.substring(idx + 1).trim();
+          if (key && val) {
+            map[key.toLowerCase()] = { originalKey: key, value: val };
+          }
+        }
+      });
+      return map;
+    }
+
+    function generateAll() {
+      const text = document.getElementById('rawText').value;
+      const codeVal = document.getElementById('bookCode').value.trim();
+      const parsed = parseInput(text);
+
+      // Distinguish Full Title vs Header Display Title
+      const fullBookName = parsed['book name']?.value || parsed['title']?.value || 'Untitled';
+      
+      // If there is a slash (e.g., "Full Name / Short Name"), use the short name in header
+      let headerTitle = fullBookName;
+      if (fullBookName.includes('/')) {
+        const parts = fullBookName.split('/');
+        headerTitle = parts[parts.length - 1].trim();
+      }
+
+      const rawAuthor = parsed['author']?.value || parsed['translator']?.value || '';
+      const headerAuthor = rawAuthor.replace(/\(.*?\)/g, '').trim();
+
+      document.getElementById('outTitle').innerText = headerTitle.toUpperCase();
+      document.getElementById('outAuthor').innerText = headerAuthor.toUpperCase();
+
+      // Structure metadata without label confusion
+      const metadataRows = [
+        ['Title', fullBookName],
+        ['Author', rawAuthor],
+        ['Publisher', parsed['publisher']?.value],
+        ['Publication Date', parsed['publication date']?.value || parsed['year']?.value || parsed['date']?.value],
+        ['Binding', parsed['binding']?.value],
+        ['Condition', (parsed['condition']?.value && parsed['condition']?.value.toLowerCase() !== 'n/a') ? parsed['condition']?.value : 'Vintage / Good'],
+        ['Edition', parsed['edition']?.value],
+        ['Printed in', parsed['printed in']?.value || parsed['country']?.value],
+        ['Notes', parsed['notes']?.value || parsed['description']?.value]
+      ];
+
+      const listContainer = document.getElementById('outMetaList');
+      listContainer.innerHTML = '';
+
+      let totalChars = 0;
+      metadataRows.forEach(([k, v]) => {
+        if (v) {
+          totalChars += v.length;
+          const row = document.createElement('div');
+          row.className = 'meta-item';
+          row.innerHTML = `<span class="meta-key">${k}</span><span class="meta-value">${v}</span>`;
+          listContainer.appendChild(row);
+        }
+      });
+
+      // Font size auto-scale
+      if (totalChars > 340) {
+        listContainer.style.fontSize = '0.72rem';
+        listContainer.style.gap = '5px';
+      } else if (totalChars > 230) {
+        listContainer.style.fontSize = '0.78rem';
+        listContainer.style.gap = '6px';
+      } else {
+        listContainer.style.fontSize = '0.84rem';
+        listContainer.style.gap = '8px';
+      }
+
+      // Footer Book Code
+      document.getElementById('outBottomCode').innerText = codeVal ? (codeVal.startsWith('Book Code') ? codeVal : `Book Code: ${codeVal}`) : 'Book Code';
+
+      // Build Instagram Post
+      buildInstagramPost(fullBookName, headerAuthor, metadataRows, codeVal);
+    }
+
+    function buildInstagramPost(bookTitle, authorName, metaRows, code) {
+      const getVal = (key) => {
+        const found = metaRows.find(r => r[0].toLowerCase() === key.toLowerCase());
+        return found ? found[1] : '';
+      };
+
+      const publisher = getVal('Publisher');
+      const year = getVal('Publication Date');
+      const edition = getVal('Edition');
+      const binding = getVal('Binding');
+      const condition = getVal('Condition');
+      const printedIn = getVal('Printed in');
+      const notes = getVal('Notes');
+
+      const cleanTag = str => str ? str.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() : '';
+      const authorTag = cleanTag(authorName);
+      const titleTag = cleanTag(bookTitle.split('/')[0]);
+
+      const caption = `Rare Vintage Collectible: ${bookTitle} 📖✨
+
+Published by ${publisher || 'Hodder and Stoughton'}${year ? ` (${year})` : ''}, this volume features ${edition || 'a notable vintage edition'} of ${authorName}'s esteemed work. A significant mid-century piece for bibliophiles, collectors, and historical literature enthusiasts.
+
+---
+
+📋 Bibliographical Details:
+• Title: ${bookTitle}
+• Author/Translator: ${authorName}
+• Publisher: ${publisher}
+• Year: ${year}
+• Edition: ${edition}
+• Binding: ${binding}
+• Condition: ${condition}
+• Origin: Printed in ${printedIn}
+• Historical Notes: ${notes}
+• Inventory Code: ${code || 'Available on request'}
+
+---
+
+📩 DM us directly to claim or purchase.
+📦 Worldwide safe tracked delivery available.
+
+.
+.
+#findrarebooks #rarebooks #vintagebooks #${authorTag} #${titleTag} #firstedition #bookcollecting #oldbooks #ukeditions #theologybooks #paperbackcollector`;
+
+      document.getElementById('outCaption').innerText = caption;
+    }
+
+    function copyCaptionText() {
+      const text = document.getElementById('outCaption').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ Instagram post copied to clipboard!');
+      });
+    }
+
+    function downloadPosterImage() {
+      const poster = document.getElementById('poster-node');
+      html2canvas(poster, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#000000'
+      }).then(canvas => {
+        const a = document.createElement('a');
+        a.download = `Book_Poster_${Date.now()}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      });
+    }
+
+    generateAll();
+  </script>
+</body>
+</html>
