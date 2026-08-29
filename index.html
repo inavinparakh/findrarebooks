@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Rare Books Poster & Instagram Studio</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --bg-body: #0d0f14;
+      --card-bg: #161922;
+      --accent: #d4af37;
+      --border: #242938;
+      --text: #ffffff;
+      --text-muted: #8e95a5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text);
+      padding: 16px 12px 60px 12px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Minimal Top Input Card */
+    .input-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .app-header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.3px;
+    }
+
+    /* 2-Column Grid on Mobile for compact inputs */
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .upload-box {
+      background: #0f1118;
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      transition: all 0.2s;
+    }
+
+    .upload-box.active {
+      border-color: #22c55e;
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.08);
+      font-weight: 600;
+    }
+
+    .code-input {
+      background: #0f1118;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+    }
+
+    .code-input:focus {
+      border-color: var(--accent);
+    }
+
+    .raw-textarea {
+      width: 100%;
+      background: #0f1118;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 0.82rem;
+      font-family: inherit;
+      min-height: 95px;
+      resize: vertical;
+      line-height: 1.35;
+      outline: none;
+    }
+
+    .raw-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    /* Actions Bar */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-download {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-copy {
+      background: #232838;
+      color: #fff;
+      border: 1px solid var(--border);
+    }
+
+    /* -------------------------------------------------------------
+       RESPONSIVE POSTER PREVIEW (Scaled for Mobile View)
+    -------------------------------------------------------------- */
+    .preview-wrapper {
+      background: #000;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .scale-container {
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 1 / 1;
+      position: relative;
+    }
+
+    /* The Real High-Res 800x800 Canvas */
+    #poster-node {
+      width: 800px;
+      height: 800px;
+      background: #000000;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: top left;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .poster-main {
+      display: flex;
+      width: 100%;
+      height: 736px;
+      background: #000000;
+    }
+
+    /* Left 65% Fixed Dark Cover Pane */
+    .poster-left-box {
+      width: 65%;
+      height: 100%;
+      background: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      box-sizing: border-box;
+    }
+
+    .poster-left-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.9);
+    }
+
+    /* Right 35% Information Pane */
+    .poster-right-box {
+      width: 35%;
+      height: 100%;
+      background: #ffffff;
+      color: #1a1a1a;
+      padding: 26px 18px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Playfair Display', serif;
+      box-sizing: border-box;
+      border-left: 1px solid #eaeaea;
+    }
+
+    .poster-header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .poster-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      color: #111111;
+    }
+
+    .poster-author {
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #333333;
+      margin-top: 6px;
+    }
+
+    .poster-divider {
+      width: 100%;
+      height: 1px;
+      background: #bcbcbc;
+      margin: 12px 0;
+    }
+
+    .poster-meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex: 1;
+      justify-content: flex-start;
+      font-size: 0.80rem;
+      line-height: 1.26;
+      overflow: hidden;
+    }
+
+    .meta-item {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      align-items: baseline;
+      column-gap: 6px;
+    }
+
+    .meta-key {
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .meta-value {
+      font-weight: 400;
+      color: #222222;
+      word-break: break-word;
+    }
+
+    /* Bottom Permanent Bar */
+    .poster-bottom-bar {
+      height: 64px;
+      width: 100%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-sizing: border-box;
+      border-top: 1px solid #dcdcdc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .bottom-code {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    .bottom-branding {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    /* Caption Card */
+    .caption-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .caption-body {
+      background: #0f1118;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: #d1d5db;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Clean Minimal Input Card -->
+    <div class="input-card">
+      <div class="app-header">
+        <h1>📖 Book Studio</h1>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Auto-Live Preview</span>
+      </div>
+
+      <div class="inputs-grid">
+        <!-- 1. Image Upload -->
+        <div class="upload-box" id="uploadBtn" onclick="document.getElementById('imgFile').click()">
+          <span id="file-label">📷 Cover Photo</span>
+          <input type="file" id="imgFile" accept="image/*" style="display:none;" onchange="previewImage(event)">
+        </div>
+
+        <!-- 2. Book Code -->
+        <input type="text" id="bookCode" class="code-input" value="Book Code: FRB0009" placeholder="Book Code: FRB0001" oninput="autoUpdate()" />
+      </div>
+
+      <!-- 3. Raw Details Textarea -->
+      <textarea id="rawText" class="raw-textarea" placeholder="Paste book description/details here..." oninput="autoUpdate()"></textarea>
+
+      <!-- Action Buttons -->
+      <div class="action-row">
+        <button class="btn btn-download" onclick="downloadPosterImage()">📥 Download PNG</button>
+        <button class="btn btn-copy" onclick="copyCaptionText()">📋 Copy Post</button>
+      </div>
+    </div>
+
+    <!-- Scaled Live Poster Preview -->
+    <div class="preview-wrapper">
+      <div class="scale-container" id="scaleBox">
+        <div id="poster-node">
+          <div class="poster-main">
+            <!-- Left 65% Fixed Black Frame -->
+            <div class="poster-left-box">
+              <img id="renderCover" src="" alt="Book Cover" style="display:none;" />
+            </div>
+
+            <!-- Right 35% Metadata -->
+            <div class="poster-right-box" id="infoBox">
+              <div class="poster-header">
+                <div class="poster-title" id="outTitle">THE GOSPELS</div>
+                <div class="poster-author" id="outAuthor">JAMES MOFFATT</div>
+              </div>
+              <div class="poster-divider"></div>
+              
+              <div class="poster-meta-list" id="outMetaList">
+                <!-- Dynamically Inserted -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Fixed Bar -->
+          <div class="poster-bottom-bar">
+            <div class="bottom-code" id="outBottomCode">Book Code: FRB0009</div>
+            <div class="bottom-branding">#findrarebooks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instagram Caption -->
+    <div class="caption-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.8rem; font-weight:700; color:var(--accent);">✨ Generated Instagram Post</span>
+      </div>
+      <div class="caption-body" id="outCaption">Caption generating...</div>
+    </div>
+  </div>
+
+  <script>
+    const defaultData = `Book Name: The Moffatt Translation of the Gospels / The Gospels
+Author: James Moffatt (Translator)
+Publisher: Hodder and Stoughton
+Publication Date: 1959
+Binding: Paperback
+Condition: Very Good
+Edition: First Paperback Edition
+Printed in: England
+Notes: First published in this form 1959; original price 2/6 net; printed and bound by Hazell Watson and Viney Ltd.`;
+
+    document.getElementById('rawText').value = defaultData;
+
+    function fitPosterScale() {
+      const scaleBox = document.getElementById('scaleBox');
+      const poster = document.getElementById('poster-node');
+      const availableWidth = scaleBox.clientWidth;
+      const scale = availableWidth / 800;
+      poster.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', fitPosterScale);
+
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById('renderCover');
+          img.src = e.target.result;
+          img.style.display = 'block';
+          const btn = document.getElementById('uploadBtn');
+          btn.classList.add('active');
+          document.getElementById('file-label').innerText = '✅ Photo Added';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function parseInput(text) {
+      const lines = text.split('\n');
+      const map = {};
+      lines.forEach(line => {
+        const idx = line.indexOf(':');
+        if (idx !== -1) {
+          const key = line.substring(0, idx).trim();
+          const val = line.substring(idx + 1).trim();
+          if (key && val) {
+            map[key.toLowerCase()] = { originalKey: key, value: val };
+          }
+        }
+      });
+      return map;
+    }
+
+    function autoUpdate() {
+      const text = document.getElementById('rawText').value;
+      const codeVal = document.getElementById('bookCode').value.trim();
+      const parsed = parseInput(text);
+
+      const fullBookName = parsed['book name']?.value || parsed['title']?.value || 'Untitled';
+      
+      let headerTitle = fullBookName;
+      if (fullBookName.includes('/')) {
+        const parts = fullBookName.split('/');
+        headerTitle = parts[parts.length - 1].trim();
+      }
+
+      const rawAuthor = parsed['author']?.value || parsed['translator']?.value || '';
+      const headerAuthor = rawAuthor.replace(/\(.*?\)/g, '').trim();
+
+      document.getElementById('outTitle').innerText = headerTitle.toUpperCase();
+      document.getElementById('outAuthor').innerText = headerAuthor.toUpperCase();
+
+      const metadataRows = [
+        ['Title', fullBookName],
+        ['Author', rawAuthor],
+        ['Publisher', parsed['publisher']?.value],
+        ['Publication Date', parsed['publication date']?.value || parsed['year']?.value || parsed['date']?.value],
+        ['Binding', parsed['binding']?.value],
+        ['Condition', (parsed['condition']?.value && parsed['condition']?.value.toLowerCase() !== 'n/a') ? parsed['condition']?.value : 'Very Good'],
+        ['Edition', parsed['edition']?.value],
+        ['Printed in', parsed['printed in']?.value || parsed['country']?.value],
+        ['Notes', parsed['notes']?.value || parsed['description']?.value]
+      ];
+
+      const listContainer = document.getElementById('outMetaList');
+      listContainer.innerHTML = '';
+
+      let totalChars = 0;
+      metadataRows.forEach(([k, v]) => {
+        if (v) {
+          totalChars += v.length;
+          const row = document.createElement('div');
+          row.className = 'meta-item';
+          row.innerHTML = `<span class="meta-key">${k}</span><span class="meta-value">${v}</span>`;
+          listContainer.appendChild(row);
+        }
+      });
+
+      if (totalChars > 340) {
+        listContainer.style.fontSize = '0.70rem';
+        listContainer.style.gap = '4px';
+      } else if (totalChars > 230) {
+        listContainer.style.fontSize = '0.76rem';
+        listContainer.style.gap = '6px';
+      } else {
+        listContainer.style.fontSize = '0.80rem';
+        listContainer.style.gap = '7px';
+      }
+
+      document.getElementById('outBottomCode').innerText = codeVal || 'Book Code';
+
+      buildInstagramPost(fullBookName, headerAuthor, metadataRows, codeVal);
+    }
+
+    function buildInstagramPost(bookTitle, authorName, metaRows, code) {
+      const getVal = (key) => {
+        const found = metaRows.find(r => r[0].toLowerCase() === key.toLowerCase());
+        return found ? found[1] : '';
+      };
+
+      const publisher = getVal('Publisher');
+      const year = getVal('Publication Date');
+      const edition = getVal('Edition');
+      const binding = getVal('Binding');
+      const condition = getVal('Condition');
+      const printedIn = getVal('Printed in');
+      const notes = getVal('Notes');
+
+      const cleanTag = str => str ? str.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() : '';
+      const authorTag = cleanTag(authorName);
+      const titleTag = cleanTag(bookTitle.split('/')[0]);
+
+      // Updated Caption (Worldwide shipping removed)
+      const caption = `Rare Vintage Collectible: ${bookTitle} 📖✨
+
+Published by ${publisher || 'Hodder and Stoughton'}${year ? ` (${year})` : ''}, this volume features ${edition || 'a notable vintage edition'} of ${authorName}'s esteemed work. A significant mid-century piece for bibliophiles, collectors, and historical literature enthusiasts.
+
+---
+
+📋 Bibliographical Details:
+• Title: ${bookTitle}
+• Author/Translator: ${authorName}
+• Publisher: ${publisher}
+• Year: ${year}
+• Edition: ${edition}
+• Binding: ${binding}
+• Condition: ${condition}
+• Origin: Printed in ${printedIn}
+• Historical Notes: ${notes}
+• Inventory Code: ${code || 'Available on request'}
+
+---
+
+📩 DM us directly to claim or purchase.
+
+.
+.
+#findrarebooks #rarebooks #vintagebooks #${authorTag} #${titleTag} #firstedition #bookcollecting #oldbooks #ukeditions #theologybooks #paperbackcollector`;
+
+      document.getElementById('outCaption').innerText = caption;
+    }
+
+    function copyCaptionText() {
+      const text = document.getElementById('outCaption').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ Instagram Post Copied!');
+      });
+    }
+
+    function downloadPosterImage() {
+      const poster = document.getElementById('poster-node');
+      
+      const oldTransform = poster.style.transform;
+      poster.style.transform = 'none';
+
+      html2canvas(poster, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#000000',
+        width: 800,
+        height: 800
+      }).then(canvas => {
+        poster.style.transform = oldTransform;
+        const a = document.createElement('a');
+        a.download = `Poster_${Date.now()}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      }).catch(() => {
+        poster.style.transform = oldTransform;
+      });
+    }
+
+    autoUpdate();
+    setTimeout(fitPosterScale, 100);
+  </script>
+</body>
+</html>
